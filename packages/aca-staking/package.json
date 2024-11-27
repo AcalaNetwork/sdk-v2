@@ -1,0 +1,42 @@
+{
+  "name": "@acala-network/aca-staking-sdk",
+  "author": "Acala Developers <info@acala.network>",
+  "version": "0.0.1",
+  "license": "Apache-2.0",
+  "type": "module",
+  "files": [
+    "dist/cjs/**",
+    "dist/esm/**"
+  ],
+  "main": "./dist/cjs/index.js",
+  "exports": {
+    ".": {
+      "require": "./dist/cjs/index.js",
+      "import": "./dist/esm/index.js",
+      "default": "./dist/esm/index.js"
+    },
+    "./*": {
+      "require": "./dist/cjs/*",
+      "import": "./dist/esm/*",
+      "default": "./dist/esm/*"
+    }
+  },
+  "scripts": {
+    "clean": "rm -rf dist tsconfig.tsbuildinfo",
+    "build": "pnpm clean && pnpm build:cjs && pnpm build:esm",
+    "build:cjs": "swc ./src --config-file ../../.cjsswcrc -d dist/cjs --copy-files --strip-leading-paths && tsc -p tsconfig.json --declarationDir dist/cjs && echo '{\"type\": \"commonjs\"}' > dist/cjs/package.json",
+    "build:esm": "swc ./src --config-file ../../.esmswcrc -d dist/esm --copy-files --strip-leading-paths && tsc -p tsconfig.json --declarationDir dist/esm"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "packageManager": "pnpm@9.14.1",
+  "peerDependencies": {
+    "@polkadot/api": "^14"
+  },
+  "dependencies": {
+    "@acala-network/types": "^6.2.0",
+    "@polkadot/api": "^14.3.1",
+    "@polkadot/api-base": "^14.3.1"
+  }
+}

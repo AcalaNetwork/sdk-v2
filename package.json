@@ -1,0 +1,32 @@
+{
+  "name": "acala-sdk-v2",
+  "repository": "https://github.com/AcalaNetwork/acala-sdk-v2",
+  "author": "Acala Developers <info@acala.network>",
+  "version": "0.0.1",
+  "license": "Apache-2.0",
+  "main": "index.js",
+  "scripts": {
+    "build": "pnpm -r run build",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "test": "pnpm -r run test"
+  },
+  "keywords": [],
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "packageManager": "pnpm@9.14.1",
+  "devDependencies": {
+    "@eslint/js": "^9.15.0",
+    "@swc/cli": "^0.5.1",
+    "@swc/core": "^1.9.2",
+    "eslint": "^9.15.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.2.1",
+    "globals": "^15.12.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.6.3",
+    "typescript-eslint": "^8.15.0"
+  }
+}

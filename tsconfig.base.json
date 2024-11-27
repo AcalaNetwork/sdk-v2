@@ -1,0 +1,43 @@
+{
+  "compilerOptions": {
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "lib": [
+      "esnext",
+      "dom",
+      "dom.iterable"
+    ],
+    "isolatedModules": true,
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "resolveJsonModule": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitAny": false,
+    "target": "esnext",
+    "skipLibCheck": true,
+    "strict": true,
+    "declaration": true,
+    "forceConsistentCasingInFileNames": true,
+    "baseUrl": ".",
+    "composite": true,
+    "paths": {
+      "@acala-network/sdk-v2": [
+        "packages/sdk/src/index.ts"
+      ],
+      "@acala-network/sdk-v2/*": [
+        "packages/sdk/src/*"
+      ],
+      "@acala-network/sdk-v2-types": [
+        "packages/types/src/index.ts"
+      ],
+      "@acala-network/sdk-v2-types/*": [
+        "packages/types/src/*"
+      ]
+    }
+  },
+  "exclude": [
+    "packages/**/*.test.ts",
+    "packages/**/*.spec.ts"
+  ]
+}
