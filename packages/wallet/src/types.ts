@@ -1,4 +1,3 @@
-import { Observable } from "rxjs";
 import { Account, Token, UnifyAddress, TokenId } from "@acala-network/sdk-v2-types";
 
 export interface Balance {
@@ -37,10 +36,4 @@ export interface Wallet {
    * @param address - The address of the account
    */
   getBalance(token: TokenId, address: UnifyAddress): Promise<Balance>;
-  /**
-   * Subscribe the balance of the token
-   * @param token - The id of the token
-   * @param address - The address of the account
-   */
-  balance$(token: TokenId, address: UnifyAddress): Observable<Balance>;
 }

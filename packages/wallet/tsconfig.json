@@ -1,5 +1,10 @@
 {
   "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "rootDir": "src",
+    "emitDeclarationOnly": true,
+    "declarationDir": "dist/esm"
+  },
   "include": [
     "src/**/*",
     "../../node_modules/@acala-network/types/**/*"

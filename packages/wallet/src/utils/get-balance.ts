@@ -1,12 +1,45 @@
-import { ApiPromise, ApiRx } from "@polkadot/api";
-import { AcalaPrimitivesCurrencyCurrencyId } from "@polkadot/types/lookup";
-import { Balance, TokenId } from "../types.js";
-import { UnifyAddress } from "@acala-network/sdk-v2-types";
+import { ApiPromise } from "@polkadot/api";
+import { Balance } from "../types.js";
+import { UnifyAddress, TokenId, Token } from "@acala-network/sdk-v2-types";
 import { getAccount } from "./get-account.js";
-import { getTokenById } from "./get-tokens.js";
+import { getRegisteredTokens, getTokenById } from "./get-tokens.js";
+import { getNativeTokenSymbol } from "./get-chain-info.js";
 
-
-export async function getBalance(api: ApiPromise, tokenId: TokenId, address: UnifyAddress): Promise<Balance> {
+/**
+ * Get the balance of an account
+ * @param api - ApiPromise
+ * @param tokenSymbolOrId - token symbol or token id
+ * @param address - account address
+ */
+export async function getBalance(api: ApiPromise, tokenSymbolOrId: string, address: UnifyAddress): Promise<Balance> {
   const account = await getAccount(api, address);
-  const token = getTokenById(api, tokenId);
+  const isTokenAddress = tokenSymbolOrId.startsWith("0x");
+
+  let token: Token | undefined;
+
+  // if the token is a token address, get the token by id
+  if (isTokenAddress) {
+    token = await getTokenById(api, tokenSymbolOrId as TokenId);
+  } else {
+    // if the token is a token symbol, get the token by symbol
+    const registeredTokens = await getRegisteredTokens(api);
+    token = registeredTokens.find(token => token.symbol === tokenSymbolOrId);
+  }
+
+  if (!token) throw new Error(`Token ${tokenSymbolOrId} not found`);
+
+  const nativeToken = getNativeTokenSymbol(api);
+
+  const balance = token.symbol === nativeToken
+    // for native token, use the balance of the account
+    ? await api.query.system.account(account.address).then(res => res.data)
+    // for other tokens, use the balance of the account
+    : await api.query.tokens.accounts(account.address, token.id);
+
+  const free = balance.free.toBigInt();
+  const locked = balance.frozen.toBigInt();
+  const reserved = balance.reserved.toBigInt();
+  const available = free - reserved > 0n ? free - reserved : 0n;
+
+  return { free, locked, reserved, available };
 }
