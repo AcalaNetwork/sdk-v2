@@ -14,7 +14,7 @@ export class WalletEntity implements Wallet {
   constructor(api: ApiPromise) {
     invariant(api, "API is required");
 
-    this.api = api
+    this.api = api;
   }
 
   getAccount(address: UnifyAddress): Promise<Account> {
@@ -35,11 +35,18 @@ export class WalletEntity implements Wallet {
     return getTokenById(this.api, nativeAssetId.toHex());
   }
 
-  getBalance(tokenOrSymbol: TokenId | string, address: UnifyAddress): Promise<Balance> {
+  getBalance(
+    tokenOrSymbol: TokenId | string,
+    address: UnifyAddress,
+  ): Promise<Balance> {
     return getBalance(this.api, tokenOrSymbol, address);
   }
 
-  watchBalance(tokenOrSymbol: TokenId | string, address: UnifyAddress, callback: (balance: Balance) => void): Promise<UnsubscribePromise> {
+  watchBalance(
+    tokenOrSymbol: TokenId | string,
+    address: UnifyAddress,
+    callback: (balance: Balance) => void,
+  ): Promise<UnsubscribePromise> {
     return watchBalance(this.api, tokenOrSymbol, address, callback);
   }
 }
