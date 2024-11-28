@@ -25,8 +25,8 @@ describe("assetToToken", () => {
     expect(api).toBeDefined();
   });
 
+  // native asset
   it("should convert asset to token with native asset", () => {
-    // native asset
     const asset = api.createType<AcalaPrimitivesCurrencyAssetIds>("AcalaPrimitivesCurrencyAssetIds", { NativeAssetId: 0 });
     const token = assetToToken(api, asset);
 

@@ -4,7 +4,6 @@ import { getAddress } from "ethers/lib/utils.js";
 import { ApiPromise, WsProvider } from "@polkadot/api";
 import dotenv from "dotenv";
 import { formatSubstrateAddress, getAccount } from "./get-account.js";
-import { EvmAddress } from "@acala-network/sdk-v2-types";
 
 dotenv.config({ path: "../../.env" });
 

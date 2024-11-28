@@ -11,10 +11,9 @@ import {
   decodeAddress,
   encodeAddress,
 } from "@polkadot/util-crypto";
-import { Account, EvmAddress, SubstrateAddress } from "@acala-network/sdk-v2-types";
+import { Account, EvmAddress, SubstrateAddress, UnifyAddress } from "@acala-network/sdk-v2-types";
 import { ApiPromise } from "@polkadot/api";
 import { isHex } from '@polkadot/util';
-import { UnifyAddress } from "@acala-network/sdk-v2-types";
 import { isAddress, getAddress } from "ethers/lib/utils.js";
 
 /**
