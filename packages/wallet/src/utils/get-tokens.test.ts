@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import dotenv from "dotenv";
 import { ApiPromise, WsProvider } from "@polkadot/api";
-import { getRegisteredTokens, getTokenById } from "./get-tokens.js";
+import { getRegisteredTokens, getTokenById, isTokenId } from "./get-tokens.js";
 import { ACALA_EVM_ADDRESS_MAP } from "../configs/evm-address-map.js";
 import { AcalaPrimitivesCurrencyCurrencyId } from "@polkadot/types/lookup";
 
@@ -11,7 +11,9 @@ describe("getRegisteredTokens", () => {
   let api!: ApiPromise;
 
   beforeAll(async () => {
-    api = await ApiPromise.create({ provider: new WsProvider(process.env.ACALA_WS_ENDPOINT) });
+    api = await ApiPromise.create({
+      provider: new WsProvider(process.env.ACALA_WS_ENDPOINT),
+    });
     await api.isReady;
   });
 
@@ -30,8 +32,10 @@ describe("getRegisteredTokens", () => {
     expect(aca?.name).toBe("Acala");
     expect(aca?.symbol).toBe("ACA");
     expect(aca?.decimals).toBe(12);
-    expect(aca?.evm).toBe(ACALA_EVM_ADDRESS_MAP.find((item) => item.symbol === "ACA")?.address);
-    expect(aca?.minimalBalance).toBe(100000000000n)
+    expect(aca?.evm).toBe(
+      ACALA_EVM_ADDRESS_MAP.find((item) => item.symbol === "ACA")?.address,
+    );
+    expect(aca?.minimalBalance).toBe(100000000000n);
   });
 
   it("should get token by id", async () => {
@@ -42,14 +46,25 @@ describe("getRegisteredTokens", () => {
     expect(token.name).toBe("Acala");
     expect(token.symbol).toBe("ACA");
     expect(token.decimals).toBe(12);
-    expect(token.evm).toBe(ACALA_EVM_ADDRESS_MAP.find((item) => item.symbol === "ACA")?.address);
+    expect(token.evm).toBe(
+      ACALA_EVM_ADDRESS_MAP.find((item) => item.symbol === "ACA")?.address,
+    );
     expect(token.minimalBalance).toBe(100000000000n);
   });
 
   it("should get dex share token", async () => {
-    const aca = api.createType<AcalaPrimitivesCurrencyCurrencyId>("AcalaPrimitivesCurrencyCurrencyId", "0x0000");
-    const ausd = api.createType<AcalaPrimitivesCurrencyCurrencyId>("AcalaPrimitivesCurrencyCurrencyId", "0x0001");
-    const lpAcaAusd = api.createType<AcalaPrimitivesCurrencyCurrencyId>("AcalaPrimitivesCurrencyCurrencyId", { DexShare: [aca, ausd] });
+    const aca = api.createType<AcalaPrimitivesCurrencyCurrencyId>(
+      "AcalaPrimitivesCurrencyCurrencyId",
+      "0x0000",
+    );
+    const ausd = api.createType<AcalaPrimitivesCurrencyCurrencyId>(
+      "AcalaPrimitivesCurrencyCurrencyId",
+      "0x0001",
+    );
+    const lpAcaAusd = api.createType<AcalaPrimitivesCurrencyCurrencyId>(
+      "AcalaPrimitivesCurrencyCurrencyId",
+      { DexShare: [aca, ausd] },
+    );
 
     const token = await getTokenById(api, lpAcaAusd.toHex());
 
@@ -60,5 +75,19 @@ describe("getRegisteredTokens", () => {
     expect(token.decimals).toBe(12);
     expect(token.evm).toBeUndefined();
     expect(token.minimalBalance).toBe(0n);
+  });
+
+  it("should return true if the token id is valid", () => {
+    const isValid = isTokenId(api, "0x0000");
+
+    expect(isValid).toBe(true);
+  });
+
+  it("should return false if the token id is invalid", () => {
+    const isValid = isTokenId(api, "invalid");
+
+    // should not throw error
+    expect(() => isTokenId(api, "invalid")).not.toThrow();
+    expect(isValid).toBe(false);
   });
 });

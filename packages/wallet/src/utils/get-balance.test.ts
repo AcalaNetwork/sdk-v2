@@ -9,7 +9,9 @@ describe("getBalance", () => {
   let api: ApiPromise;
 
   beforeAll(async () => {
-    api = await ApiPromise.create({ provider: new WsProvider(process.env.ACALA_WS_ENDPOINT) });
+    api = await ApiPromise.create({
+      provider: new WsProvider(process.env.ACALA_WS_ENDPOINT),
+    });
     await api.isReady;
   });
 
@@ -18,7 +20,11 @@ describe("getBalance", () => {
   });
 
   it("should return the balance of an account", async () => {
-    const balance = await getBalance(api, "ACA", "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY");
+    const balance = await getBalance(
+      api,
+      "ACA",
+      "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY",
+    );
 
     expect(balance).toBeDefined();
     expect(balance.free).toBeGreaterThanOrEqual(0n);
@@ -28,7 +34,11 @@ describe("getBalance", () => {
   });
 
   it("should return the balance of an account with tokenId", async () => {
-    const balance = await getBalance(api, "0x0000", "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY");
+    const balance = await getBalance(
+      api,
+      "0x0000",
+      "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY",
+    );
 
     expect(balance).toBeDefined();
     expect(balance.free).toBeGreaterThanOrEqual(0n);
@@ -38,8 +48,16 @@ describe("getBalance", () => {
   });
 
   it("should same result with tokenId and tokenSymbol", async () => {
-    const balance1 = await getBalance(api, "0x0000", "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY");
-    const balance2 = await getBalance(api, "ACA", "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY");
+    const balance1 = await getBalance(
+      api,
+      "0x0000",
+      "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY",
+    );
+    const balance2 = await getBalance(
+      api,
+      "ACA",
+      "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY",
+    );
 
     expect(balance1.available).toBe(balance2.available);
     expect(balance1.free).toBe(balance2.free);
@@ -48,20 +66,35 @@ describe("getBalance", () => {
   });
 
   it("should watch balance change", async () => {
-    const balance1 = await getBalance(api, "ACA", "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY");
-    const unsubscribe = await watchBalance(api, "ACA", "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY", (balance) => {
-      expect(balance.available).toBe(balance1.available);
-      expect(balance.free).toBe(balance1.free);
-      expect(balance.reserved).toBe(balance1.reserved);
-      expect(balance.locked).toBe(balance1.locked);
+    const balance1 = await getBalance(
+      api,
+      "ACA",
+      "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY",
+    );
+    const unsubscribe = await watchBalance(
+      api,
+      "ACA",
+      "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY",
+      (balance) => {
+        expect(balance.available).toBe(balance1.available);
+        expect(balance.free).toBe(balance1.free);
+        expect(balance.reserved).toBe(balance1.reserved);
+        expect(balance.locked).toBe(balance1.locked);
 
-      unsubscribe();
-    });
+        unsubscribe();
+      },
+    );
 
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise((resolve) => setTimeout(resolve, 1000));
   });
 
   it("should throw error if the token is not found", async () => {
-    await expect(getBalance(api, "NOT_FOUND", "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY")).rejects.toThrow("Token NOT_FOUND not found");
+    await expect(
+      getBalance(
+        api,
+        "NOT_FOUND",
+        "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY",
+      ),
+    ).rejects.toThrow("Token NOT_FOUND not found");
   });
 });
