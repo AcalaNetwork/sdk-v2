@@ -43,6 +43,10 @@ jobs:
           node-version: 22
           cache: "pnpm"
 
+      - name: Create env file
+        run: |
+          echo "ACALA_WS_ENDPOINT=wss://acala-rpc-1.aca-api.network" > .env
+
       - name: test
         run: |
           pnpm install --frozen-lockfile
