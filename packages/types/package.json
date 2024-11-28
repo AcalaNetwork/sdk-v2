@@ -25,7 +25,8 @@
     "clean": "rm -rf dist tsconfig.tsbuildinfo",
     "build": "pnpm clean && pnpm build:cjs && pnpm build:esm",
     "build:cjs": "swc ./src --config-file ../../.cjsswcrc -d dist/cjs --copy-files --strip-leading-paths && tsc -p tsconfig.json --declarationDir dist/cjs && echo '{\"type\": \"commonjs\"}' > dist/cjs/package.json",
-    "build:esm": "swc ./src --config-file ../../.esmswcrc -d dist/esm --copy-files --strip-leading-paths && tsc -p tsconfig.json --declarationDir dist/esm"
+    "build:esm": "swc ./src --config-file ../../.esmswcrc -d dist/esm --copy-files --strip-leading-paths && tsc -p tsconfig.json --declarationDir dist/esm",
+    "publish": "pnpm build && pnpm publish --access public"
   },
   "packageManager": "pnpm@9.14.1",
   "peerDependencies": {

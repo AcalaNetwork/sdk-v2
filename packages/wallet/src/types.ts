@@ -1,4 +1,5 @@
 import { Account, Token, UnifyAddress, TokenId } from "@acala-network/sdk-v2-types";
+import { UnsubscribePromise } from "@polkadot/api-base/types";
 
 export interface Balance {
   free: bigint;
@@ -36,4 +37,12 @@ export interface Wallet {
    * @param address - The address of the account
    */
   getBalance(token: TokenId, address: UnifyAddress): Promise<Balance>;
+
+  /**
+   * Watch the balance of the token
+   * @param token - The id of the token
+   * @param address - The address of the account
+   * @param callback - The callback function
+   */
+  watchBalance(token: TokenId, address: UnifyAddress, callback: (balance: Balance) => void): Promise<UnsubscribePromise>;
 }

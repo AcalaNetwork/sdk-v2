@@ -1,7 +1,7 @@
 import { ApiPromise, WsProvider } from "@polkadot/api";
 import { beforeAll, describe, it, expect, afterAll } from "vitest";
 import dotenv from "dotenv";
-import { getBalance } from "./get-balance.js";
+import { getBalance, watchBalance } from "./get-balance.js";
 
 dotenv.config({ path: "../../.env" });
 
@@ -45,6 +45,20 @@ describe("getBalance", () => {
     expect(balance1.free).toBe(balance2.free);
     expect(balance1.reserved).toBe(balance2.reserved);
     expect(balance1.locked).toBe(balance2.locked);
+  });
+
+  it("should watch balance change", async () => {
+    const balance1 = await getBalance(api, "ACA", "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY");
+    const unsubscribe = await watchBalance(api, "ACA", "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY", (balance) => {
+      expect(balance.available).toBe(balance1.available);
+      expect(balance.free).toBe(balance1.free);
+      expect(balance.reserved).toBe(balance1.reserved);
+      expect(balance.locked).toBe(balance1.locked);
+
+      unsubscribe();
+    });
+
+    await new Promise(resolve => setTimeout(resolve, 1000));
   });
 
   it("should throw error if the token is not found", async () => {
