@@ -1,5 +1,5 @@
 import { ApiPromise, WsProvider } from "@polkadot/api";
-import { getEnabledPoolList } from "./get-pool-list.js";
+import { getPoolList } from "./get-pool-list.js";
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import dotenv from "dotenv";
 
@@ -18,8 +18,8 @@ describe("get pool list", () => {
     await api.disconnect();
   });
 
-  it("should return the list of enabled pools", async () => {
-    const pools = await getEnabledPoolList(api);
+  it("should return the list of pools", async () => {
+    const pools = await getPoolList(api);
 
     expect(pools).toBeDefined();
   });
