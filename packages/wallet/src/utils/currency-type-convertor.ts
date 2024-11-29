@@ -5,7 +5,6 @@ import {
   AcalaPrimitivesCurrencyCurrencyId,
 } from "@polkadot/types/lookup";
 import { HexString } from "@polkadot/util/types";
-import invariant from "tiny-invariant";
 
 // Convert the AcalaPrimitiveCurrencyAssetIds to AcalaPrimitivesCurrencyCurrencyId
 function assetToToken(
@@ -13,15 +12,6 @@ function assetToToken(
   asset: AcalaPrimitivesCurrencyAssetIds,
 ): AcalaPrimitivesCurrencyCurrencyId {
   try {
-    // ensure the asset is valid
-    invariant(
-      asset.isErc20 ||
-        asset.isForeignAssetId ||
-        asset.isStableAssetId ||
-        asset.isNativeAssetId,
-      "Invalid asset",
-    );
-
     if (asset.isErc20) {
       return api.createType("AcalaPrimitivesCurrencyCurrencyId", {
         Erc20: asset.asErc20.toHex(),

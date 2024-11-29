@@ -17,7 +17,7 @@ export interface ExtendedBalance extends Balance {
   dexShare?: boolean;
 }
 
-export interface Wallet {
+export interface WalletAdapter {
   /**
    * Get account information by address
    * @param address - The address of the account
@@ -53,5 +53,21 @@ export interface Wallet {
     token: TokenId,
     address: UnifyAddress,
     callback: (balance: Balance) => void,
-  ): Promise<UnsubscribePromise>;
+  ): UnsubscribePromise;
+
+  /**
+   * Get the issuance of the token
+   * @param token - The id of the token
+   */
+  getIssuance(token: TokenId): Promise<bigint>;
+
+  /**
+   * Watch the issuance of the token
+   * @param token - The id of the token
+   * @param callback - The callback function
+   */
+  watchIssuance(
+    token: TokenId,
+    callback: (issuance: bigint) => void,
+  ): UnsubscribePromise;
 }

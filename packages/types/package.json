@@ -35,6 +35,7 @@
   },
   "dependencies": {
     "@polkadot/api": "^14.3.1",
+    "@acala-network/sdk-v2-types": "workspace:*",
     "ethers": "~5.7.2"
   }
 }

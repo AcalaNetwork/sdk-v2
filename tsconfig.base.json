@@ -2,7 +2,11 @@
   "compilerOptions": {
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
-    "lib": ["esnext", "dom", "dom.iterable"],
+    "lib": [
+      "esnext",
+      "dom",
+      "dom.iterable"
+    ],
     "isolatedModules": true,
     "module": "nodenext",
     "moduleResolution": "nodenext",
@@ -18,11 +22,28 @@
     "baseUrl": ".",
     "composite": true,
     "paths": {
-      "@acala-network/sdk-v2": ["packages/sdk/src/index.ts"],
-      "@acala-network/sdk-v2/*": ["packages/sdk/src/*"],
-      "@acala-network/sdk-v2-types": ["packages/types/src/index.ts"],
-      "@acala-network/sdk-v2-types/*": ["packages/types/src/*"]
+      "@acala-network/sdk-v2": [
+        "packages/sdk/src/index.ts"
+      ],
+      "@acala-network/sdk-v2/*": [
+        "packages/sdk/src/*"
+      ],
+      "@acala-network/sdk-v2-types": [
+        "packages/types/src/index.ts"
+      ],
+      "@acala-network/sdk-v2-types/*": [
+        "packages/types/src/*"
+      ],
+      "@acala-network/incentives-v2": [
+        "packages/incentives/src/index.ts"
+      ],
+      "@acala-network/incentives-v2/*": [
+        "packages/incentives/src/*"
+      ]
     }
   },
-  "exclude": ["packages/**/*.test.ts", "packages/**/*.spec.ts"]
+  "exclude": [
+    "packages/**/*.test.ts",
+    "packages/**/*.spec.ts"
+  ]
 }

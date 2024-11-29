@@ -1,14 +1,15 @@
 import invariant from "tiny-invariant";
 import { ApiPromise } from "@polkadot/api";
-import { Balance, Wallet } from "../types.js";
+import { Balance, WalletAdapter } from "../types.js";
 import { Token, TokenId, UnifyAddress } from "@acala-network/sdk-v2-types";
 import { getAccount } from "../utils/get-account.js";
 import { Account } from "@acala-network/sdk-v2-types";
 import { getRegisteredTokens, getTokenById } from "../utils/get-tokens.js";
 import { getBalance, watchBalance } from "../utils/get-balance.js";
+import { getIssuance, watchIssuance } from "../utils/get-issuance.js";
 import { UnsubscribePromise } from "@polkadot/api-base/types";
 
-export class WalletEntity implements Wallet {
+export class Wallet implements WalletAdapter {
   private readonly api: ApiPromise;
 
   constructor(api: ApiPromise) {
@@ -46,7 +47,18 @@ export class WalletEntity implements Wallet {
     tokenOrSymbol: TokenId | string,
     address: UnifyAddress,
     callback: (balance: Balance) => void,
-  ): Promise<UnsubscribePromise> {
+  ): UnsubscribePromise {
     return watchBalance(this.api, tokenOrSymbol, address, callback);
+  }
+
+  getIssuance(token: TokenId): Promise<bigint> {
+    return getIssuance(this.api, token);
+  }
+
+  watchIssuance(
+    token: TokenId,
+    callback: (issuance: bigint) => void,
+  ): UnsubscribePromise {
+    return watchIssuance(this.api, token, callback);
   }
 }
