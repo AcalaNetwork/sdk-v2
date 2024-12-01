@@ -1,4 +1,6 @@
 /* eslint-disable */
+/// FIXME: This file should be imported from @acala-network/types, but it doesn't work
+/// So I just copy it here
 
 import "@polkadot/types/lookup";
 import type {

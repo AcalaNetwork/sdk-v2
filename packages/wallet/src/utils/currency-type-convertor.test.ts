@@ -7,10 +7,6 @@ import {
   tokenIdToAssetId,
   tokenToAsset,
 } from "./currency-type-convertor.js";
-import {
-  AcalaPrimitivesCurrencyAssetIds,
-  AcalaPrimitivesCurrencyCurrencyId,
-} from "@polkadot/types/lookup";
 
 dotenv.config({ path: "../../.env" });
 
@@ -35,7 +31,7 @@ describe("assetToToken", () => {
 
   // native asset
   it("should convert asset to token with native asset", () => {
-    const asset = api.createType<AcalaPrimitivesCurrencyAssetIds>(
+    const asset = api.createType(
       "AcalaPrimitivesCurrencyAssetIds",
       { NativeAssetId: 0 },
     );
@@ -46,7 +42,7 @@ describe("assetToToken", () => {
   });
 
   it("should convert asset to token with erc20", () => {
-    const asset = api.createType<AcalaPrimitivesCurrencyAssetIds>(
+    const asset = api.createType(
       "AcalaPrimitivesCurrencyAssetIds",
       { Erc20: "0x0000000000000000000000000000000000000000" },
     );
@@ -59,7 +55,7 @@ describe("assetToToken", () => {
   });
 
   it("should convert asset to token with foreign asset", () => {
-    const asset = api.createType<AcalaPrimitivesCurrencyAssetIds>(
+    const asset = api.createType(
       "AcalaPrimitivesCurrencyAssetIds",
       { ForeignAssetId: 0 },
     );
@@ -70,7 +66,7 @@ describe("assetToToken", () => {
   });
 
   it("should convert asset to token with stable asset", () => {
-    const asset = api.createType<AcalaPrimitivesCurrencyAssetIds>(
+    const asset = api.createType(
       "AcalaPrimitivesCurrencyAssetIds",
       { StableAssetId: 0 },
     );
@@ -82,18 +78,18 @@ describe("assetToToken", () => {
 
   it("should error with invalid asset", () => {
     expect(() =>
-      assetToToken(api, {} as unknown as AcalaPrimitivesCurrencyAssetIds),
+      assetToToken(api, {} as unknown),
     ).toThrow("Asset to token conversion failed");
   });
 
   it("should convert token to asset with native asset", () => {
     // native asset
-    const token = api.createType<AcalaPrimitivesCurrencyCurrencyId>(
+    const token = api.createType(
       "AcalaPrimitivesCurrencyCurrencyId",
       { Token: "ACA" },
     );
     const asset = tokenToAsset(api, token);
-    const ldotToken = api.createType<AcalaPrimitivesCurrencyCurrencyId>(
+    const ldotToken = api.createType(
       "AcalaPrimitivesCurrencyCurrencyId",
       { LiquidCrowdloan: 13 },
     );
@@ -106,7 +102,7 @@ describe("assetToToken", () => {
   });
 
   it("should convert token to asset with erc20", () => {
-    const token = api.createType<AcalaPrimitivesCurrencyCurrencyId>(
+    const token = api.createType(
       "AcalaPrimitivesCurrencyCurrencyId",
       { Erc20: "0x0000000000000000000000000000000000000000" },
     );
@@ -119,7 +115,7 @@ describe("assetToToken", () => {
   });
 
   it("should convert token to asset with foreign asset", () => {
-    const token = api.createType<AcalaPrimitivesCurrencyCurrencyId>(
+    const token = api.createType(
       "AcalaPrimitivesCurrencyCurrencyId",
       { ForeignAsset: "0" },
     );
@@ -130,7 +126,7 @@ describe("assetToToken", () => {
   });
 
   it("should convert token to asset with stable asset", () => {
-    const token = api.createType<AcalaPrimitivesCurrencyCurrencyId>(
+    const token = api.createType(
       "AcalaPrimitivesCurrencyCurrencyId",
       { StableAssetPoolToken: "0" },
     );
@@ -141,17 +137,17 @@ describe("assetToToken", () => {
   });
 
   it("should error with invalid token", () => {
-    expect(() =>
-      tokenToAsset(api, {} as unknown as AcalaPrimitivesCurrencyCurrencyId),
-    ).toThrow("Token to asset conversion failed");
+    expect(() => tokenToAsset(api, {} as unknown)).toThrow(
+      "Token to asset conversion failed",
+    );
   });
 
   it("should convert tokenId to assetId", () => {
-    const token = api.createType<AcalaPrimitivesCurrencyCurrencyId>(
+    const token = api.createType(
       "AcalaPrimitivesCurrencyCurrencyId",
       { Token: "ACA" },
     );
-    const asset = api.createType<AcalaPrimitivesCurrencyAssetIds>(
+    const asset = api.createType(
       "AcalaPrimitivesCurrencyAssetIds",
       { NativeAssetId: { Token: "ACA" } },
     );

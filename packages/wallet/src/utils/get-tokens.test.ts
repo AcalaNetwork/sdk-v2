@@ -3,7 +3,6 @@ import dotenv from "dotenv";
 import { ApiPromise, WsProvider } from "@polkadot/api";
 import { getRegisteredTokens, getTokenById, isTokenId } from "./get-tokens.js";
 import { ACALA_EVM_ADDRESS_MAP } from "../configs/evm-address-map.js";
-import { AcalaPrimitivesCurrencyCurrencyId } from "@polkadot/types/lookup";
 
 dotenv.config({ path: "../../.env" });
 
@@ -53,18 +52,11 @@ describe("getRegisteredTokens", () => {
   });
 
   it("should get dex share token", async () => {
-    const aca = api.createType<AcalaPrimitivesCurrencyCurrencyId>(
-      "AcalaPrimitivesCurrencyCurrencyId",
-      "0x0000",
-    );
-    const ausd = api.createType<AcalaPrimitivesCurrencyCurrencyId>(
-      "AcalaPrimitivesCurrencyCurrencyId",
-      "0x0001",
-    );
-    const lpAcaAusd = api.createType<AcalaPrimitivesCurrencyCurrencyId>(
-      "AcalaPrimitivesCurrencyCurrencyId",
-      { DexShare: [aca, ausd] },
-    );
+    const aca = api.createType("AcalaPrimitivesCurrencyCurrencyId", "0x0000");
+    const ausd = api.createType("AcalaPrimitivesCurrencyCurrencyId", "0x0001");
+    const lpAcaAusd = api.createType("AcalaPrimitivesCurrencyCurrencyId", {
+      DexShare: [aca, ausd],
+    });
 
     const token = await getTokenById(api, lpAcaAusd.toHex());
 

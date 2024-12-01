@@ -19,10 +19,7 @@ export class Incentive implements IncentiveAdapter {
     return getPoolInfo(this.api, poolId);
   }
 
-  watchPoolInfo(
-    poolId: PoolId,
-    callback: (poolInfo: PoolInfo) => void,
-  ): UnsubscribePromise {
+  watchPoolInfo(poolId: PoolId, callback: (poolInfo: PoolInfo) => void): UnsubscribePromise {
     return watchPoolInfo(this.api, poolId, callback);
   }
 }

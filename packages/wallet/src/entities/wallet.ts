@@ -1,6 +1,6 @@
 import invariant from "tiny-invariant";
 import { ApiPromise } from "@polkadot/api";
-import { Balance, WalletAdapter } from "../types.js";
+import { Balance, WalletAdapter } from "../types/index.js";
 import { Token, TokenId, UnifyAddress } from "@acala-network/sdk-v2-types";
 import { getAccount } from "../utils/get-account.js";
 import { Account } from "@acala-network/sdk-v2-types";
@@ -36,10 +36,7 @@ export class Wallet implements WalletAdapter {
     return getTokenById(this.api, nativeAssetId.toHex());
   }
 
-  getBalance(
-    tokenOrSymbol: TokenId | string,
-    address: UnifyAddress,
-  ): Promise<Balance> {
+  getBalance(tokenOrSymbol: TokenId | string, address: UnifyAddress): Promise<Balance> {
     return getBalance(this.api, tokenOrSymbol, address);
   }
 
@@ -55,10 +52,7 @@ export class Wallet implements WalletAdapter {
     return getIssuance(this.api, token);
   }
 
-  watchIssuance(
-    token: TokenId,
-    callback: (issuance: bigint) => void,
-  ): UnsubscribePromise {
+  watchIssuance(token: TokenId, callback: (issuance: bigint) => void): UnsubscribePromise {
     return watchIssuance(this.api, token, callback);
   }
 }

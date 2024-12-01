@@ -1,5 +1,13 @@
 import { TokenId } from "@acala-network/sdk-v2-types";
-import { RewardConfig, PoolId, DeductionPeriodConfig, DeductionConfig, PoolInfo, BaseReward, BasePool } from "../types.js";
+import {
+  RewardConfig,
+  PoolId,
+  DeductionPeriodConfig,
+  DeductionConfig,
+  PoolInfo,
+  BaseReward,
+  BasePool,
+} from "../types.js";
 import { ApiPromise } from "@polkadot/api";
 import { U128, U32, Vec } from "@polkadot/types-codec";
 import { ModuleSupportIncentivesPoolId } from "@polkadot/types/lookup";
@@ -17,7 +25,10 @@ import { throttle } from "lodash";
  * @param poolId - The pool id
  * @returns The reward config
  */
-export async function getPoolRewardConfig(api: ApiPromise, poolId: PoolId): Promise<RewardConfig[]> {
+export async function getPoolRewardConfig(
+  api: ApiPromise,
+  poolId: PoolId,
+): Promise<RewardConfig[]> {
   const rewards = await api.query.incentives.incentiveRewardAmounts.entries<U128>(poolId);
 
   return rewards.map(([key, value]) => {
@@ -37,7 +48,9 @@ export async function getPoolRewardConfig(api: ApiPromise, poolId: PoolId): Prom
  * @param api - The api instance
  * @returns The deduction end block config
  */
-export async function getPoolDeductionPeriodConfig(api: ApiPromise): Promise<DeductionPeriodConfig[]> {
+export async function getPoolDeductionPeriodConfig(
+  api: ApiPromise,
+): Promise<DeductionPeriodConfig[]> {
   const result: Record<PoolId, bigint> = {};
 
   /**
@@ -65,7 +78,9 @@ export async function getPoolDeductionPeriodConfig(api: ApiPromise): Promise<Ded
         const params = [data.call.asLookup.hash_, data.call.asLookup.len];
 
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const preimage = await api.query.preimage.preimageFor(...params) as unknown as Option<any>;
+        const preimage = (await api.query.preimage.preimageFor(
+          ...params,
+        )) as unknown as Option<any>;
 
         call = api.createType("Call", preimage.unwrap().toHex());
       }
@@ -75,16 +90,16 @@ export async function getPoolDeductionPeriodConfig(api: ApiPromise): Promise<Ded
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const processCallsAndAnalyze = (call: GenericCall<any>) => {
         // handle the batch call
-        if (call.method === 'batch' && call.section === 'utility') {
+        if (call.method === "batch" && call.section === "utility") {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          return ((call.args as [GenericCall<any>[]])[0]).forEach((item) => {
+          return (call.args as [GenericCall<any>[]])[0].forEach((item) => {
             processCallsAndAnalyze(item);
           });
         }
 
         // handle the updateClaimRewardDeductionRates call
-        if (call.method === 'updateClaimRewardDeductionRates' && call.section === 'incentives') {
-          const args = call.args as Vec<Vec<ITuple<[ModuleSupportIncentivesPoolId, U128]>>>
+        if (call.method === "updateClaimRewardDeductionRates" && call.section === "incentives") {
+          const args = call.args as Vec<Vec<ITuple<[ModuleSupportIncentivesPoolId, U128]>>>;
 
           args.forEach((item) => {
             item.forEach(([poolId, rate]) => {
@@ -112,7 +127,10 @@ export async function getPoolDeductionPeriodConfig(api: ApiPromise): Promise<Ded
  * @param poolId - The pool id
  * @returns The deduction config
  */
-export async function getPoolDeductionConfig(api: ApiPromise, poolId: PoolId): Promise<DeductionConfig[]> {
+export async function getPoolDeductionConfig(
+  api: ApiPromise,
+  poolId: PoolId,
+): Promise<DeductionConfig[]> {
   const rate = await api.query.incentives.claimRewardDeductionRates(poolId);
   const targetDeductionToken = await api.query.incentives.claimRewardDeductionCurrency(poolId);
   const rewardTokens = await api.query.incentives.incentiveRewardAmounts.entries(poolId);
@@ -133,15 +151,23 @@ export async function getPoolDeductionConfig(api: ApiPromise, poolId: PoolId): P
   if (globalDeduction) {
     return rewardTokens.map(([key]) => ({
       token: key.args[1].toHex() as TokenId,
-      rate: rate.toBn().div(new BN(10).pow(new BN(18))).toNumber(),
+      rate: rate
+        .toBn()
+        .div(new BN(10).pow(new BN(18)))
+        .toNumber(),
     }));
   }
 
   // when the target deduction token is not null, but the rate is zero, it means the deduction is for the target token
-  return [{
-    token: targetDeductionToken.unwrap().toHex() as TokenId,
-    rate: rate.toBn().div(new BN(10).pow(new BN(18))).toNumber(),
-  }];
+  return [
+    {
+      token: targetDeductionToken.unwrap().toHex() as TokenId,
+      rate: rate
+        .toBn()
+        .div(new BN(10).pow(new BN(18)))
+        .toNumber(),
+    },
+  ];
 }
 
 /**
@@ -150,7 +176,10 @@ export async function getPoolDeductionConfig(api: ApiPromise, poolId: PoolId): P
  * @param poolId - The pool id
  * @returns The total staked
  */
-export function getPoolRewardsAndStakedInfo(api: ApiPromise, poolId: PoolId): Promise<{
+export function getPoolRewardsAndStakedInfo(
+  api: ApiPromise,
+  poolId: PoolId,
+): Promise<{
   totalShares: bigint;
   rewards: BaseReward[];
 }> {
@@ -166,7 +195,10 @@ export function getPoolRewardsAndStakedInfo(api: ApiPromise, poolId: PoolId): Pr
 }
 
 export function getBasePoolInfo(api: ApiPromise, poolId: PoolId): BasePool {
-  const rawPoolId = api.createType<ModuleSupportIncentivesPoolId>("ModuleSupportIncentivesPoolId", poolId);
+  const rawPoolId = api.createType<ModuleSupportIncentivesPoolId>(
+    "ModuleSupportIncentivesPoolId",
+    poolId,
+  );
 
   return getPoolFromRawPoolId(rawPoolId);
 }
@@ -177,10 +209,7 @@ export function getBasePoolInfo(api: ApiPromise, poolId: PoolId): BasePool {
  * @param poolId - The pool id
  * @returns The pool info
  */
-export async function getPoolInfo(
-  api: ApiPromise,
-  poolId: PoolId,
-): Promise<PoolInfo> {
+export async function getPoolInfo(api: ApiPromise, poolId: PoolId): Promise<PoolInfo> {
   const rewardConfig = await getPoolRewardConfig(api, poolId);
   const deductionConfig = await getPoolDeductionConfig(api, poolId);
   const { totalShares, rewards } = await getPoolRewardsAndStakedInfo(api, poolId);
@@ -199,7 +228,11 @@ export async function getPoolInfo(
   };
 }
 
-export async function watchPoolInfo(api: ApiPromise, poolId: PoolId, callback: (poolInfo: PoolInfo) => void): UnsubscribePromise {
+export async function watchPoolInfo(
+  api: ApiPromise,
+  poolId: PoolId,
+  callback: (poolInfo: PoolInfo) => void,
+): UnsubscribePromise {
   // watch the pool info, that will trigger every `api.consts.incentives.accumulatePeriod`(about 5 block)
   const unsubList: VoidFn[] = [];
 
@@ -211,21 +244,29 @@ export async function watchPoolInfo(api: ApiPromise, poolId: PoolId, callback: (
   const rewards = await getPoolRewardConfig(api, poolId);
 
   // when the deduction rate is updated, update the pool info
-  unsubList.push(await api.query.incentives.claimRewardDeductionRates(poolId, () => {
-    trigger();
-  }));
+  unsubList.push(
+    await api.query.incentives.claimRewardDeductionRates(poolId, () => {
+      trigger();
+    }),
+  );
 
   // when the pool info storage is updated, update the pool info
-  unsubList.push(await api.query.rewards.poolInfos(poolId, () => {
-    trigger();
-  }));
+  unsubList.push(
+    await api.query.rewards.poolInfos(poolId, () => {
+      trigger();
+    }),
+  );
 
   // when the reward amount is updated, update the pool info
-  await Promise.all(rewards.map(async (reward) => {
-    unsubList.push(await api.query.incentives.incentiveRewardAmounts(poolId, reward.token, () => {
-      trigger();
-    }));
-  }));
+  await Promise.all(
+    rewards.map(async (reward) => {
+      unsubList.push(
+        await api.query.incentives.incentiveRewardAmounts(poolId, reward.token, () => {
+          trigger();
+        }),
+      );
+    }),
+  );
 
   return () => {
     unsubList.forEach((unsub) => unsub());

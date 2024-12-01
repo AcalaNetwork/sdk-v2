@@ -1,22 +1,6 @@
-import {
-  hexToU8a,
-  u8aConcat,
-  u8aEq,
-  u8aFixLength,
-  u8aToHex,
-} from "@polkadot/util";
-import {
-  addressEq,
-  blake2AsU8a,
-  decodeAddress,
-  encodeAddress,
-} from "@polkadot/util-crypto";
-import {
-  Account,
-  EvmAddress,
-  SubstrateAddress,
-  UnifyAddress,
-} from "@acala-network/sdk-v2-types";
+import { hexToU8a, u8aConcat, u8aEq, u8aFixLength, u8aToHex } from "@polkadot/util";
+import { addressEq, blake2AsU8a, decodeAddress, encodeAddress } from "@polkadot/util-crypto";
+import { Account, EvmAddress, SubstrateAddress, UnifyAddress } from "@acala-network/sdk-v2-types";
 import { ApiPromise } from "@polkadot/api";
 import { isHex } from "@polkadot/util";
 import { isAddress, getAddress } from "ethers/lib/utils.js";
@@ -26,9 +10,7 @@ import { isAddress, getAddress } from "ethers/lib/utils.js";
  * @param address - The substrate address
  * @returns The evm address
  */
-export const computeDefaultEvmAddress = (
-  address: SubstrateAddress,
-): EvmAddress => {
+export const computeDefaultEvmAddress = (address: SubstrateAddress): EvmAddress => {
   const publicKey = decodeAddress(address);
   const isStartWithEvm = u8aEq("evm:", publicKey.slice(0, 4));
 
@@ -51,9 +33,7 @@ export const computeDefaultEvmAddress = (
  * @param address - The evm address
  * @returns The substrate address
  */
-export function computeDefaultSubstrateAddress(
-  address: EvmAddress,
-): SubstrateAddress {
+export function computeDefaultSubstrateAddress(address: EvmAddress): SubstrateAddress {
   return encodeAddress(
     u8aFixLength(u8aConcat("evm:", hexToU8a(address)), 256, true),
   ).toString() as SubstrateAddress;
@@ -74,9 +54,7 @@ export function isDefaultSubstrateAddress(address: SubstrateAddress): boolean {
  * @param address - The default substrate address
  * @returns The evm address
  */
-export function getEvmAddressFromDefaultSubstrateAddress(
-  address: SubstrateAddress,
-): EvmAddress {
+export function getEvmAddressFromDefaultSubstrateAddress(address: SubstrateAddress): EvmAddress {
   const publicKey = decodeAddress(address);
   return getAddress(u8aToHex(publicKey.slice(4, 24))) as EvmAddress;
 }
@@ -131,10 +109,7 @@ export function formatSubstrateAddress(
   return encodeAddress(decodeAddress(address), ss58) as SubstrateAddress;
 }
 
-export async function getAccount(
-  api: ApiPromise,
-  address: UnifyAddress,
-): Promise<Account> {
+export async function getAccount(api: ApiPromise, address: UnifyAddress): Promise<Account> {
   const isSubstrateAddress = isValidSubstrateAddress(address);
   const isEvmAddress = isValidEvmAddress(address);
 
@@ -182,9 +157,7 @@ export async function getAccount(
     const input = getAddress(address) as EvmAddress;
     const boundedSubstrateAddress = await api.query.evmAccounts.accounts(input);
 
-    const isBound = !(
-      boundedSubstrateAddress.isEmpty || boundedSubstrateAddress.isNone
-    );
+    const isBound = !(boundedSubstrateAddress.isEmpty || boundedSubstrateAddress.isNone);
     const defaultSubstrateAddress = computeDefaultSubstrateAddress(input);
     const substrateAddress = isBound
       ? boundedSubstrateAddress.unwrap().toString()

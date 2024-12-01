@@ -45,12 +45,12 @@
     "@polkadot/util-crypto": "^13.2.3",
     "ethers": "~5.7.0",
     "rxjs": "^7.8.1",
-    "tiny-invariant": "^1.3.3"
-  },
-  "devDependencies": {
     "@polkadot/api-base": "^14.3.1",
     "@polkadot/types": "^14.3.1",
     "@polkadot/types-codec": "^14.3.1",
+    "tiny-invariant": "^1.3.3"
+  },
+  "devDependencies": {
     "@vitest/coverage-v8": "^2.1.5",
     "dotenv": "^16.4.5",
     "typescript": "^5.5.4",

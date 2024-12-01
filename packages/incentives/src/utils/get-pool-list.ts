@@ -12,7 +12,7 @@ export function getPoolFromRawPoolId(poolId: ModuleSupportIncentivesPoolId): Bas
     token: token.toHex() as TokenId,
     type,
     status: "ENABLED",
-  }
+  };
 }
 
 /**

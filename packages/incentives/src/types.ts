@@ -3,7 +3,7 @@ import { TokenId } from "@acala-network/sdk-v2-types";
 export const PoolTypes = ["LOANS", "DEX", "EARNING"] as const;
 
 // The type of the incentive
-export type PoolType = typeof PoolTypes[number];
+export type PoolType = (typeof PoolTypes)[number];
 
 // The status of the pool
 export type PoolStatus = "ENABLED" | "DISABLED";

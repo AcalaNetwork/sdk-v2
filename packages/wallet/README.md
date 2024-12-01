@@ -26,9 +26,7 @@ const wallet = new Wallet(api);
 2. Get account
 
 ```typescript
-const account = await wallet.getAccount(
-  "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY",
-);
+const account = await wallet.getAccount("5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY");
 
 console.log(account.address);
 console.log(account.evm);
@@ -55,10 +53,7 @@ console.log(token.decimals);
 5. Get Balance
 
 ```typescript
-const balance = await wallet.getBalance(
-  "ACA",
-  "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY",
-);
+const balance = await wallet.getBalance("ACA", "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY");
 
 console.log(balance);
 ```

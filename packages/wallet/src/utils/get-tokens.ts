@@ -1,27 +1,17 @@
 import { EvmAddress, Token, TokenId } from "@acala-network/sdk-v2-types";
 import { ApiPromise } from "@polkadot/api";
-import {
-  assetIdToTokenId,
-  tokenIdToAssetId,
-} from "./currency-type-convertor.js";
+import { assetIdToTokenId, tokenIdToAssetId } from "./currency-type-convertor.js";
 import { hexToString } from "@polkadot/util";
-import {
-  ACALA_EVM_ADDRESS_MAP,
-  KARURA_EVM_ADDRESSES_MAP,
-} from "../configs/evm-address-map.js";
+import { ACALA_EVM_ADDRESS_MAP, KARURA_EVM_ADDRESSES_MAP } from "../configs/evm-address-map.js";
 import { getChain } from "./get-chain-info.js";
 import {
   AcalaPrimitivesCurrencyAssetMetadata,
   AcalaPrimitivesCurrencyCurrencyId,
 } from "@polkadot/types/lookup";
 
-function tryToGetEvmAddress(
-  api: ApiPromise,
-  symbol: string,
-): EvmAddress | undefined {
+function tryToGetEvmAddress(api: ApiPromise, symbol: string): EvmAddress | undefined {
   const chain = getChain(api);
-  const configs =
-    chain === "acala" ? ACALA_EVM_ADDRESS_MAP : KARURA_EVM_ADDRESSES_MAP;
+  const configs = chain === "acala" ? ACALA_EVM_ADDRESS_MAP : KARURA_EVM_ADDRESSES_MAP;
   const matched = configs.find((item) => item.symbol === symbol);
 
   return matched?.address;
@@ -53,8 +43,7 @@ async function getDexShareToken(
   api: ApiPromise,
   token: AcalaPrimitivesCurrencyCurrencyId,
 ): Promise<Token> {
-  if (!token.isDexShare)
-    throw new Error(`The token is not a dex share token: ${token.toHuman()}`);
+  if (!token.isDexShare) throw new Error(`The token is not a dex share token: ${token.toHuman()}`);
 
   const tokens = token.asDexShare;
   const token0 = await getTokenById(api, tokens[0].toHex());
@@ -75,10 +64,7 @@ async function getDexShareToken(
  * @param api - ApiPromise
  * @param tokenId - token id
  */
-export function getRawToken(
-  api: ApiPromise,
-  tokenId: TokenId,
-): AcalaPrimitivesCurrencyCurrencyId {
+export function getRawToken(api: ApiPromise, tokenId: TokenId): AcalaPrimitivesCurrencyCurrencyId {
   try {
     return api.createType<AcalaPrimitivesCurrencyCurrencyId>(
       "AcalaPrimitivesCurrencyCurrencyId",
@@ -122,19 +108,14 @@ export async function getRegisteredTokens(api: ApiPromise): Promise<Token[]> {
  * @param api - ApiPromise
  * @param tokenId - token id
  */
-export async function getTokenById(
-  api: ApiPromise,
-  tokenId: TokenId,
-): Promise<Token> {
+export async function getTokenById(api: ApiPromise, tokenId: TokenId): Promise<Token> {
   const rawToken = getRawToken(api, tokenId);
 
   if (rawToken.isDexShare) {
     return getDexShareToken(api, rawToken);
   }
 
-  const data = await api.query.assetRegistry.assetMetadatas(
-    tokenIdToAssetId(api, tokenId),
-  );
+  const data = await api.query.assetRegistry.assetMetadatas(tokenIdToAssetId(api, tokenId));
 
   return getTokenFromAssetRegistry(api, rawToken.toHex(), data.unwrap());
 }
