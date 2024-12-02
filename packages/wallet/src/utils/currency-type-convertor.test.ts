@@ -7,10 +7,7 @@ import {
   tokenIdToAssetId,
   tokenToAsset,
 } from "./currency-type-convertor.js";
-import {
-  AcalaPrimitivesCurrencyAssetIds,
-  AcalaPrimitivesCurrencyCurrencyId,
-} from "@polkadot/types/lookup";
+import { AcalaPrimitivesCurrencyAssetIds, AcalaPrimitivesCurrencyCurrencyId } from "@polkadot/types/lookup";
 
 dotenv.config({ path: "../../.env" });
 
@@ -141,9 +138,9 @@ describe("assetToToken", () => {
   });
 
   it("should error with invalid token", () => {
-    expect(() =>
-      tokenToAsset(api, {} as unknown as AcalaPrimitivesCurrencyCurrencyId),
-    ).toThrow("Token to asset conversion failed");
+    expect(() => tokenToAsset(api, {} as unknown as AcalaPrimitivesCurrencyCurrencyId)).toThrow(
+      "Token to asset conversion failed",
+    );
   });
 
   it("should convert tokenId to assetId", () => {

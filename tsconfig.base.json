@@ -21,7 +21,9 @@
       "@acala-network/sdk-v2": ["packages/sdk/src/index.ts"],
       "@acala-network/sdk-v2/*": ["packages/sdk/src/*"],
       "@acala-network/sdk-v2-types": ["packages/types/src/index.ts"],
-      "@acala-network/sdk-v2-types/*": ["packages/types/src/*"]
+      "@acala-network/sdk-v2-types/*": ["packages/types/src/*"],
+      "@acala-network/incentives-v2": ["packages/incentives/src/index.ts"],
+      "@acala-network/incentives-v2/*": ["packages/incentives/src/*"]
     }
   },
   "exclude": ["packages/**/*.test.ts", "packages/**/*.spec.ts"]

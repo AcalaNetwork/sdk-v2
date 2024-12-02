@@ -1,11 +1,7 @@
 import { TokenId } from "@acala-network/sdk-v2-types";
 import { ApiPromise, ApiRx } from "@polkadot/api";
-import {
-  AcalaPrimitivesCurrencyAssetIds,
-  AcalaPrimitivesCurrencyCurrencyId,
-} from "@polkadot/types/lookup";
+import { AcalaPrimitivesCurrencyAssetIds, AcalaPrimitivesCurrencyCurrencyId } from "@polkadot/types/lookup";
 import { HexString } from "@polkadot/util/types";
-import invariant from "tiny-invariant";
 
 // Convert the AcalaPrimitiveCurrencyAssetIds to AcalaPrimitivesCurrencyCurrencyId
 function assetToToken(
@@ -13,15 +9,6 @@ function assetToToken(
   asset: AcalaPrimitivesCurrencyAssetIds,
 ): AcalaPrimitivesCurrencyCurrencyId {
   try {
-    // ensure the asset is valid
-    invariant(
-      asset.isErc20 ||
-        asset.isForeignAssetId ||
-        asset.isStableAssetId ||
-        asset.isNativeAssetId,
-      "Invalid asset",
-    );
-
     if (asset.isErc20) {
       return api.createType("AcalaPrimitivesCurrencyCurrencyId", {
         Erc20: asset.asErc20.toHex(),
@@ -88,20 +75,14 @@ function tokenToAsset(
 
 // Convert the tokenId to assetId
 function tokenIdToAssetId(api: ApiPromise | ApiRx, tokenId: string): HexString {
-  const token = api.createType<AcalaPrimitivesCurrencyCurrencyId>(
-    "AcalaPrimitivesCurrencyCurrencyId",
-    tokenId,
-  );
+  const token = api.createType<AcalaPrimitivesCurrencyCurrencyId>("AcalaPrimitivesCurrencyCurrencyId", tokenId);
 
   return tokenToAsset(api, token).toHex();
 }
 
 // Convert the assetId to tokenId
 function assetIdToTokenId(api: ApiPromise | ApiRx, assetId: string): TokenId {
-  const asset = api.createType<AcalaPrimitivesCurrencyAssetIds>(
-    "AcalaPrimitivesCurrencyAssetIds",
-    assetId,
-  );
+  const asset = api.createType<AcalaPrimitivesCurrencyAssetIds>("AcalaPrimitivesCurrencyAssetIds", assetId);
 
   return assetToToken(api, asset).toHex();
 }

@@ -50,6 +50,7 @@ jobs:
       - name: test
         run: |
           pnpm install --frozen-lockfile
+          pnpm build
           pnpm test
 
   build_code:
