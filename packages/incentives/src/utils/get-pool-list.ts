@@ -1,6 +1,6 @@
 import { ApiPromise } from "@polkadot/api";
 import { ModuleSupportIncentivesPoolId } from "@polkadot/types/lookup";
-import { BasePool, PoolId } from "../types.js";
+import { BasePool, PoolId } from "../types/index.js";
 import { TokenId } from "@acala-network/sdk-v2-types";
 
 export function getPoolFromRawPoolId(poolId: ModuleSupportIncentivesPoolId): BasePool {

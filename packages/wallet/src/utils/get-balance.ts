@@ -26,11 +26,7 @@ function formatBalance(data: FrameSystemAccountInfo["data"] | OrmlTokensAccountD
  * @param tokenSymbolOrId - token symbol or token id
  * @param address - account address
  */
-export async function getBalance(
-  api: ApiPromise,
-  tokenSymbolOrId: string,
-  address: UnifyAddress,
-): Promise<Balance> {
+export async function getBalance(api: ApiPromise, tokenSymbolOrId: string, address: UnifyAddress): Promise<Balance> {
   const account = await getAccount(api, address);
   const token = await lookupToken(api, tokenSymbolOrId);
 
@@ -40,9 +36,7 @@ export async function getBalance(
       ? // for native token, use the balance of the account
         await api.query.system.account(account.address).then((res) => formatBalance(res.data))
       : // for other tokens, use the balance of the account
-        await api.query.tokens
-          .accounts(account.address, token.id)
-          .then((res) => formatBalance(res));
+        await api.query.tokens.accounts(account.address, token.id).then((res) => formatBalance(res));
 
   return balance;
 }

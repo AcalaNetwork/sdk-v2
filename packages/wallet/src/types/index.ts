@@ -44,11 +44,7 @@ export interface WalletAdapter {
    * @param address - The address of the account
    * @param callback - The callback function
    */
-  watchBalance(
-    token: TokenId,
-    address: UnifyAddress,
-    callback: (balance: Balance) => void,
-  ): UnsubscribePromise;
+  watchBalance(token: TokenId, address: UnifyAddress, callback: (balance: Balance) => void): UnsubscribePromise;
 
   /**
    * Get the issuance of the token

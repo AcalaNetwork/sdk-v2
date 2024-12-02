@@ -4,10 +4,7 @@ import { assetIdToTokenId, tokenIdToAssetId } from "./currency-type-convertor.js
 import { hexToString } from "@polkadot/util";
 import { ACALA_EVM_ADDRESS_MAP, KARURA_EVM_ADDRESSES_MAP } from "../configs/evm-address-map.js";
 import { getChain } from "./get-chain-info.js";
-import {
-  AcalaPrimitivesCurrencyAssetMetadata,
-  AcalaPrimitivesCurrencyCurrencyId,
-} from "@polkadot/types/lookup";
+import { AcalaPrimitivesCurrencyAssetMetadata, AcalaPrimitivesCurrencyCurrencyId } from "@polkadot/types/lookup";
 
 function tryToGetEvmAddress(api: ApiPromise, symbol: string): EvmAddress | undefined {
   const chain = getChain(api);
@@ -17,15 +14,8 @@ function tryToGetEvmAddress(api: ApiPromise, symbol: string): EvmAddress | undef
   return matched?.address;
 }
 
-function getTokenFromAssetRegistry(
-  api: ApiPromise,
-  id: TokenId,
-  value: AcalaPrimitivesCurrencyAssetMetadata,
-): Token {
-  const token = api.createType<AcalaPrimitivesCurrencyCurrencyId>(
-    "AcalaPrimitivesCurrencyCurrencyId",
-    id,
-  );
+function getTokenFromAssetRegistry(api: ApiPromise, id: TokenId, value: AcalaPrimitivesCurrencyAssetMetadata): Token {
+  const token = api.createType<AcalaPrimitivesCurrencyCurrencyId>("AcalaPrimitivesCurrencyCurrencyId", id);
   const isErc20 = token.isErc20;
   const symbol = hexToString(value.symbol.toString());
 
@@ -39,10 +29,7 @@ function getTokenFromAssetRegistry(
   };
 }
 
-async function getDexShareToken(
-  api: ApiPromise,
-  token: AcalaPrimitivesCurrencyCurrencyId,
-): Promise<Token> {
+async function getDexShareToken(api: ApiPromise, token: AcalaPrimitivesCurrencyCurrencyId): Promise<Token> {
   if (!token.isDexShare) throw new Error(`The token is not a dex share token: ${token.toHuman()}`);
 
   const tokens = token.asDexShare;
@@ -66,10 +53,7 @@ async function getDexShareToken(
  */
 export function getRawToken(api: ApiPromise, tokenId: TokenId): AcalaPrimitivesCurrencyCurrencyId {
   try {
-    return api.createType<AcalaPrimitivesCurrencyCurrencyId>(
-      "AcalaPrimitivesCurrencyCurrencyId",
-      tokenId,
-    );
+    return api.createType<AcalaPrimitivesCurrencyCurrencyId>("AcalaPrimitivesCurrencyCurrencyId", tokenId);
   } catch (error) {
     throw new Error(`Invalid token ID: ${tokenId}`, { cause: error });
   }
@@ -95,11 +79,7 @@ export async function getRegisteredTokens(api: ApiPromise): Promise<Token[]> {
   const list = await api.query.assetRegistry.assetMetadatas.entries();
 
   return list.map(([key, value]) => {
-    return getTokenFromAssetRegistry(
-      api,
-      assetIdToTokenId(api, key.args[0].toHex()),
-      value.unwrap(),
-    );
+    return getTokenFromAssetRegistry(api, assetIdToTokenId(api, key.args[0].toHex()), value.unwrap());
   });
 }
 

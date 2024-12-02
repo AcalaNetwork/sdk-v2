@@ -61,12 +61,8 @@ console.log(balance);
 6. Watch Balance
 
 ```typescript
-const ubsub = await wallet.watchBalance(
-  "ACA",
-  "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY",
-  (balance) => {
-    console.log(balance);
-    unsub();
-  },
-);
+const ubsub = await wallet.watchBalance("ACA", "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY", (balance) => {
+  console.log(balance);
+  unsub();
+});
 ```

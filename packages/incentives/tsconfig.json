@@ -7,9 +7,5 @@
   },
   "include": ["src/**/*", "../../node_modules/@acala-network/types/**/*"],
   "exclude": ["src/**/*.test.ts", "src/**/*.spec.ts"],
-  "references": [
-    {
-      "path": "../../packages/types"
-    }
-  ]
+  "references": [{ "path": "../../packages/types" }, { "path": "../../packages/wallet" }]
 }

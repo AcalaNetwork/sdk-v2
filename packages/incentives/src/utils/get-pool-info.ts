@@ -5,9 +5,9 @@ import {
   DeductionPeriodConfig,
   DeductionConfig,
   PoolInfo,
-  BaseReward,
+  PoolReward,
   BasePool,
-} from "../types.js";
+} from "../types/index.js";
 import { ApiPromise } from "@polkadot/api";
 import { U128, U32, Vec } from "@polkadot/types-codec";
 import { ModuleSupportIncentivesPoolId } from "@polkadot/types/lookup";
@@ -15,20 +15,16 @@ import { ITuple } from "@polkadot/types-codec/types";
 import { GenericCall } from "@polkadot/types";
 import { Option } from "@polkadot/types-codec/cjs/bundle";
 import { getPoolFromRawPoolId } from "./get-pool-list.js";
-import { BN } from "bn.js";
 import { UnsubscribePromise, VoidFn } from "@polkadot/api-base/types";
 import { throttle } from "lodash";
 
 /**
- * Get the reward config of the pool
+ * Get the reward configs of the pool
  * @param api - The api instance
  * @param poolId - The pool id
- * @returns The reward config
+ * @returns The reward configs
  */
-export async function getPoolRewardConfig(
-  api: ApiPromise,
-  poolId: PoolId,
-): Promise<RewardConfig[]> {
+export async function getPoolRewardConfigs(api: ApiPromise, poolId: PoolId): Promise<RewardConfig[]> {
   const rewards = await api.query.incentives.incentiveRewardAmounts.entries<U128>(poolId);
 
   return rewards.map(([key, value]) => {
@@ -48,9 +44,7 @@ export async function getPoolRewardConfig(
  * @param api - The api instance
  * @returns The deduction end block config
  */
-export async function getPoolDeductionPeriodConfig(
-  api: ApiPromise,
-): Promise<DeductionPeriodConfig[]> {
+export async function getPoolDeductionPeriodConfig(api: ApiPromise): Promise<DeductionPeriodConfig[]> {
   const result: Record<PoolId, bigint> = {};
 
   /**
@@ -77,9 +71,9 @@ export async function getPoolDeductionPeriodConfig(
       if (data.call.isLookup) {
         const params = [data.call.asLookup.hash_, data.call.asLookup.len];
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const preimage = (await api.query.preimage.preimageFor(
           ...params,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
         )) as unknown as Option<any>;
 
         call = api.createType("Call", preimage.unwrap().toHex());
@@ -122,17 +116,14 @@ export async function getPoolDeductionPeriodConfig(
 }
 
 /**
- * Get the deduction config of the pool
+ * Get the deduction configs of the pool
  * @param api - The api instance
  * @param poolId - The pool id
- * @returns The deduction config
+ * @returns The deduction configs
  */
-export async function getPoolDeductionConfig(
-  api: ApiPromise,
-  poolId: PoolId,
-): Promise<DeductionConfig[]> {
+export async function getPoolDeductionConfigs(api: ApiPromise, poolId: PoolId): Promise<DeductionConfig[]> {
   const rate = await api.query.incentives.claimRewardDeductionRates(poolId);
-  const targetDeductionToken = await api.query.incentives.claimRewardDeductionCurrency(poolId);
+  const specifiedDeductionToken = await api.query.incentives.claimRewardDeductionCurrency(poolId);
   const rewardTokens = await api.query.incentives.incentiveRewardAmounts.entries(poolId);
 
   // when there is no reward token, return empty array
@@ -145,27 +136,23 @@ export async function getPoolDeductionConfig(
     return [];
   }
 
-  // when the target deduction token is null, but the rate is not zero, it means the deduction is for all the reward token
-  const globalDeduction = targetDeductionToken.isNone && !rate.isZero();
+  // when the specified deduction token is null, and the rate is not zero,
+  // means the deduction is for all the reward tokens
+  const globalDeduction = specifiedDeductionToken.isNone && !rate.isZero();
 
   if (globalDeduction) {
     return rewardTokens.map(([key]) => ({
       token: key.args[1].toHex() as TokenId,
-      rate: rate
-        .toBn()
-        .div(new BN(10).pow(new BN(18)))
-        .toNumber(),
+      rate: rate.toBigInt(),
     }));
   }
 
-  // when the target deduction token is not null, but the rate is zero, it means the deduction is for the target token
+  // when the specified deduction token is not null, and the rate is not zero,
+  // means the deduction is for the specified token
   return [
     {
-      token: targetDeductionToken.unwrap().toHex() as TokenId,
-      rate: rate
-        .toBn()
-        .div(new BN(10).pow(new BN(18)))
-        .toNumber(),
+      token: specifiedDeductionToken.unwrap().toHex() as TokenId,
+      rate: rate.toBigInt(),
     },
   ];
 }
@@ -181,7 +168,7 @@ export function getPoolRewardsAndStakedInfo(
   poolId: PoolId,
 ): Promise<{
   totalShares: bigint;
-  rewards: BaseReward[];
+  rewards: PoolReward[];
 }> {
   return api.query.rewards.poolInfos(poolId).then((poolInfo) => ({
     totalShares: poolInfo.totalShares.toBigInt(),
@@ -195,10 +182,7 @@ export function getPoolRewardsAndStakedInfo(
 }
 
 export function getBasePoolInfo(api: ApiPromise, poolId: PoolId): BasePool {
-  const rawPoolId = api.createType<ModuleSupportIncentivesPoolId>(
-    "ModuleSupportIncentivesPoolId",
-    poolId,
-  );
+  const rawPoolId = api.createType<ModuleSupportIncentivesPoolId>("ModuleSupportIncentivesPoolId", poolId);
 
   return getPoolFromRawPoolId(rawPoolId);
 }
@@ -210,20 +194,19 @@ export function getBasePoolInfo(api: ApiPromise, poolId: PoolId): BasePool {
  * @returns The pool info
  */
 export async function getPoolInfo(api: ApiPromise, poolId: PoolId): Promise<PoolInfo> {
-  const rewardConfig = await getPoolRewardConfig(api, poolId);
-  const deductionConfig = await getPoolDeductionConfig(api, poolId);
+  const rewardConfigs = await getPoolRewardConfigs(api, poolId);
+  const deductionConfigs = await getPoolDeductionConfigs(api, poolId);
   const { totalShares, rewards } = await getPoolRewardsAndStakedInfo(api, poolId);
   const globalDeductionPeriodConfig = await getPoolDeductionPeriodConfig(api);
   const deductionPeriodConfig = globalDeductionPeriodConfig.find((item) => item.poolId === poolId);
 
   return {
     ...getBasePoolInfo(api, poolId),
-    // when there is at least one reward config, the pool is enabled
-    status: rewardConfig.length > 0 ? "ENABLED" : "DISABLED",
+    status: rewardConfigs.length > 0 ? "ENABLED" : "DISABLED",
     totalStaked: totalShares,
     rewards,
-    rewardConfig,
-    deductionConfig,
+    rewardConfigs,
+    deductionConfigs,
     deductionPeriodConfig: deductionPeriodConfig || null,
   };
 }
@@ -239,9 +222,10 @@ export async function watchPoolInfo(
   // the trigger function, throttle the update of the pool info
   const trigger = throttle(() => {
     getPoolInfo(api, poolId).then(callback);
-  }, 10);
+  }, 200);
 
-  const rewards = await getPoolRewardConfig(api, poolId);
+  // fetch the reward configs for watching the reward amount
+  const rewardConfigs = await getPoolRewardConfigs(api, poolId);
 
   // when the deduction rate is updated, update the pool info
   unsubList.push(
@@ -250,23 +234,19 @@ export async function watchPoolInfo(
     }),
   );
 
-  // when the pool info storage is updated, update the pool info
+  // when the pool info storage has been updated, update the pool info
   unsubList.push(
     await api.query.rewards.poolInfos(poolId, () => {
       trigger();
     }),
   );
 
-  // when the reward amount is updated, update the pool info
-  await Promise.all(
-    rewards.map(async (reward) => {
-      unsubList.push(
-        await api.query.incentives.incentiveRewardAmounts(poolId, reward.token, () => {
-          trigger();
-        }),
-      );
-    }),
-  );
+  // when the reward amount has been updated, update the pool info
+  const subRewardsChange = rewardConfigs.map(async (reward) => {
+    return await api.query.incentives.incentiveRewardAmounts(poolId, reward.token, () => trigger());
+  });
+
+  unsubList.push(...(await Promise.all(subRewardsChange)));
 
   return () => {
     unsubList.forEach((unsub) => unsub());

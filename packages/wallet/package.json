@@ -14,11 +14,6 @@
       "require": "./dist/cjs/index.js",
       "import": "./dist/esm/index.js",
       "default": "./dist/esm/index.js"
-    },
-    "./*": {
-      "require": "./dist/cjs/*",
-      "import": "./dist/esm/*",
-      "default": "./dist/esm/*"
     }
   },
   "scripts": {
@@ -55,5 +50,7 @@
     "dotenv": "^16.4.5",
     "typescript": "^5.5.4",
     "vitest": "^2.1.5"
-  }
+  },
+  "module": "./dist/esm/index.js",
+  "types": "./dist/esm/index.d.ts"
 }
