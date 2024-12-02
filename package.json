@@ -10,7 +10,7 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "test": "pnpm -r run test",
-    "publish": "pnpm publish"
+    "publish": "pnpm -r run publish"
   },
   "keywords": [],
   "type": "module",
