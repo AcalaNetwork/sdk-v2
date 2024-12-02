@@ -7,6 +7,7 @@ import {
   tokenIdToAssetId,
   tokenToAsset,
 } from "./currency-type-convertor.js";
+import { AcalaPrimitivesCurrencyAssetIds, AcalaPrimitivesCurrencyCurrencyId } from "@polkadot/types/lookup";
 
 dotenv.config({ path: "../../.env" });
 
@@ -31,7 +32,7 @@ describe("assetToToken", () => {
 
   // native asset
   it("should convert asset to token with native asset", () => {
-    const asset = api.createType(
+    const asset = api.createType<AcalaPrimitivesCurrencyAssetIds>(
       "AcalaPrimitivesCurrencyAssetIds",
       { NativeAssetId: 0 },
     );
@@ -42,7 +43,7 @@ describe("assetToToken", () => {
   });
 
   it("should convert asset to token with erc20", () => {
-    const asset = api.createType(
+    const asset = api.createType<AcalaPrimitivesCurrencyAssetIds>(
       "AcalaPrimitivesCurrencyAssetIds",
       { Erc20: "0x0000000000000000000000000000000000000000" },
     );
@@ -55,7 +56,7 @@ describe("assetToToken", () => {
   });
 
   it("should convert asset to token with foreign asset", () => {
-    const asset = api.createType(
+    const asset = api.createType<AcalaPrimitivesCurrencyAssetIds>(
       "AcalaPrimitivesCurrencyAssetIds",
       { ForeignAssetId: 0 },
     );
@@ -66,7 +67,7 @@ describe("assetToToken", () => {
   });
 
   it("should convert asset to token with stable asset", () => {
-    const asset = api.createType(
+    const asset = api.createType<AcalaPrimitivesCurrencyAssetIds>(
       "AcalaPrimitivesCurrencyAssetIds",
       { StableAssetId: 0 },
     );
@@ -78,18 +79,18 @@ describe("assetToToken", () => {
 
   it("should error with invalid asset", () => {
     expect(() =>
-      assetToToken(api, {} as unknown),
+      assetToToken(api, {} as unknown as AcalaPrimitivesCurrencyAssetIds),
     ).toThrow("Asset to token conversion failed");
   });
 
   it("should convert token to asset with native asset", () => {
     // native asset
-    const token = api.createType(
+    const token = api.createType<AcalaPrimitivesCurrencyCurrencyId>(
       "AcalaPrimitivesCurrencyCurrencyId",
       { Token: "ACA" },
     );
     const asset = tokenToAsset(api, token);
-    const ldotToken = api.createType(
+    const ldotToken = api.createType<AcalaPrimitivesCurrencyCurrencyId>(
       "AcalaPrimitivesCurrencyCurrencyId",
       { LiquidCrowdloan: 13 },
     );
@@ -102,7 +103,7 @@ describe("assetToToken", () => {
   });
 
   it("should convert token to asset with erc20", () => {
-    const token = api.createType(
+    const token = api.createType<AcalaPrimitivesCurrencyCurrencyId>(
       "AcalaPrimitivesCurrencyCurrencyId",
       { Erc20: "0x0000000000000000000000000000000000000000" },
     );
@@ -115,7 +116,7 @@ describe("assetToToken", () => {
   });
 
   it("should convert token to asset with foreign asset", () => {
-    const token = api.createType(
+    const token = api.createType<AcalaPrimitivesCurrencyCurrencyId>(
       "AcalaPrimitivesCurrencyCurrencyId",
       { ForeignAsset: "0" },
     );
@@ -126,7 +127,7 @@ describe("assetToToken", () => {
   });
 
   it("should convert token to asset with stable asset", () => {
-    const token = api.createType(
+    const token = api.createType<AcalaPrimitivesCurrencyCurrencyId>(
       "AcalaPrimitivesCurrencyCurrencyId",
       { StableAssetPoolToken: "0" },
     );
@@ -137,17 +138,17 @@ describe("assetToToken", () => {
   });
 
   it("should error with invalid token", () => {
-    expect(() => tokenToAsset(api, {} as unknown)).toThrow(
+    expect(() => tokenToAsset(api, {} as unknown as AcalaPrimitivesCurrencyCurrencyId)).toThrow(
       "Token to asset conversion failed",
     );
   });
 
   it("should convert tokenId to assetId", () => {
-    const token = api.createType(
+    const token = api.createType<AcalaPrimitivesCurrencyCurrencyId>(
       "AcalaPrimitivesCurrencyCurrencyId",
       { Token: "ACA" },
     );
-    const asset = api.createType(
+    const asset = api.createType<AcalaPrimitivesCurrencyAssetIds>(
       "AcalaPrimitivesCurrencyAssetIds",
       { NativeAssetId: { Token: "ACA" } },
     );

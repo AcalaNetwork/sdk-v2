@@ -1,7 +1,7 @@
 import { ApiPromise } from "@polkadot/api";
 import { SubstrateAddress, TokenId, UnifyAddress } from "@acala-network/sdk-v2-types";
 import { DeductionConfig, PoolId, UserPosition, UserReward } from "../types/index.js";
-import { getAccount } from "@acala-network/wallet-v2";
+import { getAccount } from "@acala-network/wallet-v2/utils/get-account.js";
 import { getPoolDeductionConfigs, getPoolRewardsAndStakedInfo, watchPoolInfo } from "./get-pool-info.js";
 import { throttle } from "lodash";
 import { UnsubscribePromise, VoidFn } from "@polkadot/api-base/types";
