@@ -52,8 +52,6 @@
   "devDependencies": {
     "@types/bn.js": "^5.1.6",
     "@types/lodash": "^4.17.13",
-    "@vitest/coverage-v8": "^2.1.5",
-    "dotenv": "^16.4.5",
-    "vitest": "^2.1.5"
+    "dotenv": "^16.4.5"
   }
 }
