@@ -1,7 +1,7 @@
 {
   "name": "@acala-network/wallet-v2",
   "author": "Acala Developers <info@acala.network>",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "license": "Apache-2.0",
   "type": "module",
   "files": [
@@ -28,8 +28,7 @@
     "test": "vitest --coverage --reporter=verbose --disable-console-intercept",
     "build": "pnpm clean && pnpm build:cjs && pnpm build:esm",
     "build:cjs": "swc ./src --config-file ../../.cjsswcrc -d dist/cjs --copy-files --strip-leading-paths && tsc -p tsconfig.json --declarationDir dist/cjs && echo '{\"type\": \"commonjs\"}' > dist/cjs/package.json",
-    "build:esm": "swc ./src --config-file ../../.esmswcrc -d dist/esm --copy-files --strip-leading-paths && tsc -p tsconfig.json --declarationDir dist/esm",
-    "publish": "pnpm publish --access public"
+    "build:esm": "swc ./src --config-file ../../.esmswcrc -d dist/esm --copy-files --strip-leading-paths && tsc -p tsconfig.json --declarationDir dist/esm"
   },
   "engines": {
     "node": ">=22"

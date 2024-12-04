@@ -110,12 +110,14 @@ export interface UserPosition {
 export interface ACAStakingLedger {
   totalLocked: bigint;
   activeAmount: bigint;
+  unlockingAmount: bigint;
   unlockingList: { amount: bigint; at: bigint }[];
 }
 
 export interface ACAStakingPoolConfig {
   minBond: bigint;
   unbondingPeriod: number;
+  maxUnbondingChunks: number;
 }
 
 export interface IncentiveAdapter {
@@ -133,6 +135,9 @@ export interface IncentiveAdapter {
     address: UnifyAddress,
     callback: (userPosition: UserPosition) => void,
   ): UnsubscribePromise;
+
+  // specific for acala staking
+  acaStaking: AcaStakingAdapter;
 }
 
 export interface AcaStakingAdapter {
