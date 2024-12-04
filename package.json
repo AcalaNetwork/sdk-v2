@@ -2,7 +2,7 @@
   "name": "acala-sdk-v2",
   "repository": "https://github.com/AcalaNetwork/acala-sdk-v2",
   "author": "Acala Developers <info@acala.network>",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "license": "Apache-2.0",
   "main": "index.js",
   "scripts": {
@@ -10,7 +10,7 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "test": "pnpm -r run test",
-    "publish": "pnpm publish"
+    "publish": "pnpm -r run publish"
   },
   "keywords": [],
   "type": "module",

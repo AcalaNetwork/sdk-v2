@@ -1,10 +1,12 @@
 import { ApiPromise } from "@polkadot/api";
-import { BasePool, IncentiveAdapter, PoolId, PoolInfo, UserPosition } from "../types/index.js";
+import { AcaStakingAdapter, BasePool, IncentiveAdapter, PoolId, PoolInfo, UserPosition } from "../types/index.js";
 import { getPoolList } from "../utils/get-pool-list.js";
 import { getPoolInfo, watchPoolInfo } from "../utils/get-pool-info.js";
 import { UnsubscribePromise } from "@polkadot/api-base/cjs/types/index";
 import { UnifyAddress } from "@acala-network/sdk-v2-types";
 import { getUserPosition, watchUserPosition } from "../utils/get-user-position.js";
+import { getUserACAStakingLedger, watchUserACAStakingLedger } from "../utils/get-user-ledger.js";
+import { getACAStakingPoolConfig } from "../utils/get-aca-staking-configs.js";
 
 export class Incentive implements IncentiveAdapter {
   private api: ApiPromise;
@@ -36,4 +38,10 @@ export class Incentive implements IncentiveAdapter {
   ): UnsubscribePromise {
     return watchUserPosition(this.api, poolId, address, callback);
   }
+
+  acaStaking: AcaStakingAdapter = {
+    getPoolConfig: () => getACAStakingPoolConfig(this.api),
+    getLedger: (address) => getUserACAStakingLedger(this.api, address),
+    watchLedger: (address, callback) => watchUserACAStakingLedger(this.api, address, callback),
+  };
 }
