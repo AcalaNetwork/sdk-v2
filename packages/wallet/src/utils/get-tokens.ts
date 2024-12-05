@@ -47,10 +47,10 @@ async function getDexShareToken(api: ApiPromise, token: AcalaPrimitivesCurrencyC
 
   return {
     id: token.toHex(),
-    name: `LP ${token0.name}-${token1.name}`,
+    name: `LP ${token0.symbol}-${token1.symbol}`,
     symbol: `LP ${token0.symbol}-${token1.symbol}`,
     decimals: token0.decimals,
-    evm: tryToGetEvmAddress(api, `LP ${token0.name}-${token1.name}`, `LP_${token0.symbol}_${token1.symbol}`),
+    evm: tryToGetEvmAddress(api, `LP ${token0.symbol}-${token1.symbol}`, `LP_${token0.symbol}_${token1.symbol}`),
     minimalBalance: 0n,
   };
 }
