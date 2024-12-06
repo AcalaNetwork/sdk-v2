@@ -1,11 +1,6 @@
 import { ApiPromise } from "@polkadot/api";
 import { TokenId, Token, EvmAddress } from "@acala-network/sdk-v2-types";
-import {
-  getRegisteredTokens,
-  isTokenId,
-  getERC20Token,
-  getTokenById,
-} from "./get-tokens.js";
+import { getRegisteredTokens, isTokenId, getERC20Token, getTokenById } from "./get-tokens.js";
 import { PublicClient } from "viem";
 import { isValidEvmAddress } from "./get-account.js";
 
@@ -30,9 +25,7 @@ export async function lookupToken(
 
   const registeredTokens = await getRegisteredTokens(api);
 
-  const token = registeredTokens.find(
-    (token) => token.symbol === tokenSymbolOrId,
-  );
+  const token = registeredTokens.find((token) => token.symbol === tokenSymbolOrId);
 
   if (!token) throw new Error(`Token ${tokenSymbolOrId} not found`);
 

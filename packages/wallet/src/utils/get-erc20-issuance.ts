@@ -6,10 +6,7 @@ import { erc20Abi, PublicClient } from "viem";
  * @param client - PublicClient
  * @param token - EVM address of the token
  */
-export function getErc20Issuance(
-  client: PublicClient,
-  token: EvmAddress,
-): Promise<bigint> {
+export function getErc20Issuance(client: PublicClient, token: EvmAddress): Promise<bigint> {
   return client.readContract({
     address: token,
     abi: erc20Abi,

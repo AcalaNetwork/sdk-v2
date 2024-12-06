@@ -51,10 +51,7 @@ export class Wallet implements WalletAdapter {
     return getTokenById(this.api, nativeAssetId.toHex());
   }
 
-  getBalance(
-    tokenOrSymbol: TokenId | string,
-    address: UnifyAddress,
-  ): Promise<Balance> {
+  getBalance(tokenOrSymbol: TokenId | string, address: UnifyAddress): Promise<Balance> {
     return getBalance(this.api, this.publicClient, tokenOrSymbol, address);
   }
 
@@ -63,23 +60,14 @@ export class Wallet implements WalletAdapter {
     address: UnifyAddress,
     callback: (balance: Balance) => void,
   ): UnsubscribePromise {
-    return watchBalance(
-      this.api,
-      this.publicClient,
-      tokenOrSymbol,
-      address,
-      callback,
-    );
+    return watchBalance(this.api, this.publicClient, tokenOrSymbol, address, callback);
   }
 
   getIssuance(token: TokenId): Promise<bigint> {
     return getIssuance(this.api, this.publicClient, token);
   }
 
-  watchIssuance(
-    token: TokenId,
-    callback: (issuance: bigint) => void,
-  ): UnsubscribePromise {
+  watchIssuance(token: TokenId, callback: (issuance: bigint) => void): UnsubscribePromise {
     return watchIssuance(this.api, this.publicClient, token, callback);
   }
 }

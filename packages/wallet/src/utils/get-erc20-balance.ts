@@ -18,11 +18,7 @@ function formatBalance(balance: bigint): Balance {
  * @param token - EVM address of the token
  * @param address - EVM address of the account
  */
-export function getErc20Balance(
-  client: PublicClient,
-  token: EvmAddress,
-  address: EvmAddress,
-): Promise<Balance> {
+export function getErc20Balance(client: PublicClient, token: EvmAddress, address: EvmAddress): Promise<Balance> {
   return client
     .readContract({
       address: token,
@@ -55,9 +51,7 @@ export function watchErc20Balance(
     abi: erc20Abi,
     eventName: "Transfer",
     onLogs: (logs) => {
-      const shouldUpdate = logs.some(
-        (log) => log.args.from === address || log.args.to === address,
-      );
+      const shouldUpdate = logs.some((log) => log.args.from === address || log.args.to === address);
 
       if (shouldUpdate) {
         getErc20Balance(client, token, address).then((balance) => {

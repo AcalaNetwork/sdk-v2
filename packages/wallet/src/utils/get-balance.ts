@@ -3,10 +3,7 @@ import { Balance } from "../types/index.js";
 import { UnifyAddress } from "@acala-network/sdk-v2-types";
 import { getAccount } from "./get-account.js";
 import { lookupToken } from "./lookup-token.js";
-import {
-  FrameSystemAccountInfo,
-  OrmlTokensAccountData,
-} from "@polkadot/types/lookup";
+import { FrameSystemAccountInfo, OrmlTokensAccountData } from "@polkadot/types/lookup";
 import { UnsubscribePromise } from "@polkadot/api-base/types";
 import { PublicClient } from "viem";
 import { getErc20Balance, watchErc20Balance } from "./get-erc20-balance.js";
@@ -16,9 +13,7 @@ import invariant from "tiny-invariant";
  * Format balance from raw data
  * @param data - raw balance data
  */
-function formatBalance(
-  data: FrameSystemAccountInfo["data"] | OrmlTokensAccountData,
-) {
+function formatBalance(data: FrameSystemAccountInfo["data"] | OrmlTokensAccountData) {
   const free = data.free.toBigInt();
   const locked = data.frozen.toBigInt();
   const reserved = data.reserved.toBigInt();
@@ -53,15 +48,11 @@ export async function getBalance(
   if (token.isNative) {
     invariant(account.address, "Substrate address is not set");
 
-    return api.query.system
-      .account(account.address)
-      .then((res) => formatBalance(res.data));
+    return api.query.system.account(account.address).then((res) => formatBalance(res.data));
   }
 
   // for other tokens, use the balance of the account
-  return api.query.tokens
-    .accounts(account.address, token.id)
-    .then((res) => formatBalance(res));
+  return api.query.tokens.accounts(account.address, token.id).then((res) => formatBalance(res));
 }
 
 export async function watchBalance(
@@ -88,12 +79,8 @@ export async function watchBalance(
   invariant(account.address, "Substrate address is not set");
 
   if (token.isNative) {
-    return await api.query.system.account(account.address, (res) =>
-      onChange(formatBalance(res.data)),
-    );
+    return await api.query.system.account(account.address, (res) => onChange(formatBalance(res.data)));
   }
 
-  return await api.query.tokens.accounts(account.address, token.id, (data) =>
-    onChange(formatBalance(data)),
-  );
+  return await api.query.tokens.accounts(account.address, token.id, (data) => onChange(formatBalance(data)));
 }
