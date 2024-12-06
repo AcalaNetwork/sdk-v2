@@ -1,23 +1,24 @@
 import { EvmAddress } from "@acala-network/sdk-v2-types";
 
-export const ACALA_EVM_ADDRESS_MAP: { symbol: string; address: EvmAddress }[] = [
-  {
-    symbol: "ACA",
-    address: "0x0000000000000000000100000000000000000000",
-  },
-  {
-    symbol: "DOT",
-    address: "0x0000000000000000000100000000000000000002",
-  },
-  {
-    symbol: "LDOT",
-    address: "0x0000000000000000000100000000000000000003",
-  },
-  {
-    symbol: "TAI",
-    address: "0x892ddd9387DBDeCEDaEF878bd7AcF8603109227F",
-  },
-];
+export const ACALA_EVM_ADDRESS_MAP: { symbol: string; address: EvmAddress }[] =
+  [
+    {
+      symbol: "ACA",
+      address: "0x0000000000000000000100000000000000000000",
+    },
+    {
+      symbol: "DOT",
+      address: "0x0000000000000000000100000000000000000002",
+    },
+    {
+      symbol: "LDOT",
+      address: "0x0000000000000000000100000000000000000003",
+    },
+    {
+      symbol: "TAI",
+      address: "0x892ddd9387DBDeCEDaEF878bd7AcF8603109227F",
+    },
+  ];
 
 export const KARURA_EVM_ADDRESSES_MAP: {
   symbol: string;

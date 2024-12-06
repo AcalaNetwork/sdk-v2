@@ -126,7 +126,10 @@ export interface IncentiveAdapter {
   // get the pool info by pool id
   getPoolInfo(poolId: PoolId): Promise<PoolInfo>;
   // watch the pool info by pool id
-  watchPoolInfo(poolId: PoolId, callback: (poolInfo: PoolInfo) => void): UnsubscribePromise;
+  watchPoolInfo(
+    poolId: PoolId,
+    callback: (poolInfo: PoolInfo) => void,
+  ): UnsubscribePromise;
   // get the user pool info
   getUserPosition(poolId: PoolId, address: UnifyAddress): Promise<UserPosition>;
   // watch the user stake info
@@ -146,5 +149,8 @@ export interface AcaStakingAdapter {
   // get the acala staking ledger of the user
   getLedger(address: UnifyAddress): Promise<ACAStakingLedger>;
   // watch the acala staking ledger of the user
-  watchLedger(address: UnifyAddress, callback: (ledger: ACAStakingLedger) => void): UnsubscribePromise;
+  watchLedger(
+    address: UnifyAddress,
+    callback: (ledger: ACAStakingLedger) => void,
+  ): UnsubscribePromise;
 }

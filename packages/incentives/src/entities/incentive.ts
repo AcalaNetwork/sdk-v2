@@ -1,11 +1,24 @@
 import { ApiPromise } from "@polkadot/api";
-import { AcaStakingAdapter, BasePool, IncentiveAdapter, PoolId, PoolInfo, UserPosition } from "../types/index.js";
+import {
+  AcaStakingAdapter,
+  BasePool,
+  IncentiveAdapter,
+  PoolId,
+  PoolInfo,
+  UserPosition,
+} from "../types/index.js";
 import { getPoolList } from "../utils/get-pool-list.js";
 import { getPoolInfo, watchPoolInfo } from "../utils/get-pool-info.js";
 import { UnsubscribePromise } from "@polkadot/api-base/cjs/types/index";
 import { UnifyAddress } from "@acala-network/sdk-v2-types";
-import { getUserPosition, watchUserPosition } from "../utils/get-user-position.js";
-import { getUserACAStakingLedger, watchUserACAStakingLedger } from "../utils/get-user-ledger.js";
+import {
+  getUserPosition,
+  watchUserPosition,
+} from "../utils/get-user-position.js";
+import {
+  getUserACAStakingLedger,
+  watchUserACAStakingLedger,
+} from "../utils/get-user-ledger.js";
 import { getACAStakingPoolConfig } from "../utils/get-aca-staking-configs.js";
 
 export class Incentive implements IncentiveAdapter {
@@ -23,11 +36,17 @@ export class Incentive implements IncentiveAdapter {
     return getPoolInfo(this.api, poolId);
   }
 
-  watchPoolInfo(poolId: PoolId, callback: (poolInfo: PoolInfo) => void): UnsubscribePromise {
+  watchPoolInfo(
+    poolId: PoolId,
+    callback: (poolInfo: PoolInfo) => void,
+  ): UnsubscribePromise {
     return watchPoolInfo(this.api, poolId, callback);
   }
 
-  getUserPosition(poolId: PoolId, address: UnifyAddress): Promise<UserPosition> {
+  getUserPosition(
+    poolId: PoolId,
+    address: UnifyAddress,
+  ): Promise<UserPosition> {
     return getUserPosition(this.api, poolId, address);
   }
 
@@ -42,6 +61,7 @@ export class Incentive implements IncentiveAdapter {
   acaStaking: AcaStakingAdapter = {
     getPoolConfig: () => getACAStakingPoolConfig(this.api),
     getLedger: (address) => getUserACAStakingLedger(this.api, address),
-    watchLedger: (address, callback) => watchUserACAStakingLedger(this.api, address, callback),
+    watchLedger: (address, callback) =>
+      watchUserACAStakingLedger(this.api, address, callback),
   };
 }
