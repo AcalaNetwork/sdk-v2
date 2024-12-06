@@ -19,8 +19,8 @@ export interface WalletAdapter {
    */
   getAccount(address: UnifyAddress): Promise<Account>;
   /**
-   * Get token information by token id
-   * @param id - The id of the token
+   * Get token information by token id or EVM address
+   * @param id - The id of the token or EVM address
    */
   getToken(id: TokenId): Promise<Token>;
   /**

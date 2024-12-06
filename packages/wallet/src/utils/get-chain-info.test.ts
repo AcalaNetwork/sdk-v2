@@ -9,7 +9,7 @@ import dotenv from "dotenv";
 
 dotenv.config({ path: "../../.env" });
 
-describe("getChain", () => {
+describe("get chain info", () => {
   let api: ApiPromise;
 
   beforeAll(async () => {

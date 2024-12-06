@@ -3,8 +3,9 @@ import { ApiPromise } from "@polkadot/api";
 import { assetIdToTokenId, tokenIdToAssetId } from "./currency-type-convertor.js";
 import { hexToString } from "@polkadot/util";
 import { ACALA_EVM_ADDRESS_MAP, KARURA_EVM_ADDRESSES_MAP } from "../configs/evm-address-map.js";
-import { getChain } from "./get-chain-info.js";
+import { getChain, getNativeTokenSymbol } from "./get-chain-info.js";
 import { AcalaPrimitivesCurrencyAssetMetadata, AcalaPrimitivesCurrencyCurrencyId } from "@polkadot/types/lookup";
+import { erc20Abi, PublicClient } from "viem";
 
 function tryToGetEvmAddress(api: ApiPromise, name: string, symbol: string): EvmAddress | undefined {
   const chain = getChain(api);
@@ -26,6 +27,7 @@ function getTokenFromAssetRegistry(api: ApiPromise, id: TokenId, value: AcalaPri
   const token = api.createType<AcalaPrimitivesCurrencyCurrencyId>("AcalaPrimitivesCurrencyCurrencyId", id);
   const isErc20 = token.isErc20;
   const symbol = hexToString(value.symbol.toString());
+  const isNative = symbol === getNativeTokenSymbol(api);
   const name = hexToString(value.name.toHex());
 
   return {
@@ -33,6 +35,8 @@ function getTokenFromAssetRegistry(api: ApiPromise, id: TokenId, value: AcalaPri
     name,
     symbol,
     decimals: value.decimals.toNumber(),
+    isNative,
+    isFormEvm: isErc20,
     evm: isErc20 ? token.asErc20.toHex() : tryToGetEvmAddress(api, name, symbol),
     minimalBalance: value.minimalBalance.toBigInt(),
   };
@@ -50,6 +54,8 @@ async function getDexShareToken(api: ApiPromise, token: AcalaPrimitivesCurrencyC
     name: `LP ${token0.symbol}-${token1.symbol}`,
     symbol: `LP ${token0.symbol}-${token1.symbol}`,
     decimals: token0.decimals,
+    isNative: false,
+    isFormEvm: false,
     evm: tryToGetEvmAddress(api, `LP ${token0.symbol}-${token1.symbol}`, `LP_${token0.symbol}_${token1.symbol}`),
     minimalBalance: 0n,
   };
@@ -107,4 +113,42 @@ export async function getTokenById(api: ApiPromise, tokenId: TokenId): Promise<T
   const data = await api.query.assetRegistry.assetMetadatas(tokenIdToAssetId(api, tokenId));
 
   return getTokenFromAssetRegistry(api, rawToken.toHex(), data.unwrap());
+}
+
+/**
+ * Get ERC20 token information which is created in EVM
+ * @param api - ApiPromise
+ * @param client - PublicClient
+ * @param address - EVM address
+ */
+export async function getERC20Token(api: ApiPromise, client: PublicClient, address: EvmAddress): Promise<Token> {
+  const symbol = await client.readContract({
+    address,
+    abi: erc20Abi,
+    functionName: "symbol",
+  });
+  const decimals = await client.readContract({
+    address,
+    abi: erc20Abi,
+    functionName: "decimals",
+  });
+  const name = await client.readContract({
+    address,
+    abi: erc20Abi,
+    functionName: "name",
+  });
+  const rawTokenId = api.createType<AcalaPrimitivesCurrencyCurrencyId>("AcalaPrimitivesCurrencyCurrencyId", {
+    Erc20: address,
+  });
+  const isNative = symbol === getNativeTokenSymbol(api);
+
+  return {
+    id: rawTokenId.toHex(),
+    name: name,
+    symbol: symbol,
+    decimals: decimals,
+    evm: address,
+    isNative,
+    isFormEvm: true,
+  };
 }

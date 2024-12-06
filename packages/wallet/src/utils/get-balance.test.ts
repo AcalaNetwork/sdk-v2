@@ -2,17 +2,25 @@ import { ApiPromise, WsProvider } from "@polkadot/api";
 import { beforeAll, describe, it, expect, afterAll } from "vitest";
 import dotenv from "dotenv";
 import { getBalance, watchBalance } from "./get-balance.js";
+import { createPublicClient, http, PublicClient } from "viem";
+import { acala } from "viem/chains";
 
 dotenv.config({ path: "../../.env" });
 
 describe("getBalance", () => {
   let api: ApiPromise;
+  let publicClient: PublicClient;
 
   beforeAll(async () => {
     api = await ApiPromise.create({
       provider: new WsProvider(process.env.ACALA_WS_ENDPOINT),
     });
     await api.isReady;
+
+    publicClient = createPublicClient({
+      chain: acala,
+      transport: http(),
+    });
   });
 
   afterAll(async () => {
@@ -22,6 +30,7 @@ describe("getBalance", () => {
   it("should return the balance of an account", async () => {
     const balance = await getBalance(
       api,
+      publicClient,
       "ACA",
       "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY",
     );
@@ -36,6 +45,7 @@ describe("getBalance", () => {
   it("should return the balance of an account with tokenId", async () => {
     const balance = await getBalance(
       api,
+      publicClient,
       "0x0000",
       "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY",
     );
@@ -50,11 +60,13 @@ describe("getBalance", () => {
   it("should same result with tokenId and tokenSymbol", async () => {
     const balance1 = await getBalance(
       api,
+      publicClient,
       "0x0000",
       "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY",
     );
     const balance2 = await getBalance(
       api,
+      publicClient,
       "ACA",
       "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY",
     );
@@ -68,11 +80,13 @@ describe("getBalance", () => {
   it("should watch balance change", async () => {
     const balance1 = await getBalance(
       api,
+      publicClient,
       "ACA",
       "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY",
     );
     const unsubscribe = await watchBalance(
       api,
+      publicClient,
       "ACA",
       "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY",
       (balance) => {
@@ -92,6 +106,7 @@ describe("getBalance", () => {
     await expect(
       getBalance(
         api,
+        publicClient,
         "NOT_FOUND",
         "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY",
       ),
