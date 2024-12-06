@@ -1,7 +1,7 @@
 {
   "name": "@acala-network/sdk-v2-types",
   "author": "Acala Developers <info@acala.network>",
-  "version": "0.0.3",
+  "version": "0.0.4-2",
   "license": "Apache-2.0",
   "type": "module",
   "files": [
@@ -34,7 +34,6 @@
   },
   "dependencies": {
     "@polkadot/api": "^14.3.1",
-    "@acala-network/sdk-v2-types": "workspace:*",
     "ethers": "~5.7.2"
   }
 }

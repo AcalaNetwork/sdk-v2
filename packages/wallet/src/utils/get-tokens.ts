@@ -24,7 +24,7 @@ function getTokenFromAssetRegistry(api: ApiPromise, id: TokenId, value: AcalaPri
     name: hexToString(value.name.toHex()),
     symbol,
     decimals: value.decimals.toNumber(),
-    evm: isErc20 ? id : tryToGetEvmAddress(api, symbol),
+    evm: isErc20 ? token.asErc20.toHex() : tryToGetEvmAddress(api, symbol),
     minimalBalance: value.minimalBalance.toBigInt(),
   };
 }

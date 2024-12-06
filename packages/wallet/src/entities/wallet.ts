@@ -9,13 +9,19 @@ import { getBalance, watchBalance } from "../utils/get-balance.js";
 import { getIssuance, watchIssuance } from "../utils/get-issuance.js";
 import { UnsubscribePromise } from "@polkadot/api-base/types";
 
+interface WalletOptions {
+  api: ApiPromise;
+  evmRpcUrl?: string;
+}
+
 export class Wallet implements WalletAdapter {
   private readonly api: ApiPromise;
+  private readonly evmRpcUrl?: string;
 
-  constructor(api: ApiPromise) {
-    invariant(api, "API is required");
-
-    this.api = api;
+  constructor(options: WalletOptions) {
+    invariant(options.api, "API is required");
+    this.api = options.api;
+    this.evmRpcUrl = options.evmRpcUrl;
   }
 
   getAccount(address: UnifyAddress): Promise<Account> {
