@@ -23,8 +23,8 @@ function tryToGetEvmAddress(api: ApiPromise, name: string, symbol: string): EvmA
 }
 
 function getTokenFromAssetRegistry(api: ApiPromise, id: TokenId, value: AcalaPrimitivesCurrencyAssetMetadata): Token {
-  // const token = api.createType<AcalaPrimitivesCurrencyCurrencyId>("AcalaPrimitivesCurrencyCurrencyId", id);
-  // const isErc20 = token.isErc20;
+  const token = api.createType<AcalaPrimitivesCurrencyCurrencyId>("AcalaPrimitivesCurrencyCurrencyId", id);
+  const isErc20 = token.isErc20;
   const symbol = hexToString(value.symbol.toString());
   const name = hexToString(value.name.toHex());
 
@@ -33,7 +33,7 @@ function getTokenFromAssetRegistry(api: ApiPromise, id: TokenId, value: AcalaPri
     name,
     symbol,
     decimals: value.decimals.toNumber(),
-    evm: tryToGetEvmAddress(api, name, symbol),
+    evm: isErc20 ? token.asErc20.toHex() : tryToGetEvmAddress(api, name, symbol),
     minimalBalance: value.minimalBalance.toBigInt(),
   };
 }
