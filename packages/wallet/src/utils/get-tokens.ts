@@ -7,10 +7,18 @@ import { getChain, getNativeTokenSymbol } from "./get-chain-info.js";
 import { AcalaPrimitivesCurrencyAssetMetadata, AcalaPrimitivesCurrencyCurrencyId } from "@polkadot/types/lookup";
 import { erc20Abi, PublicClient } from "viem";
 
-function tryToGetEvmAddress(api: ApiPromise, symbol: string): EvmAddress | undefined {
+function tryToGetEvmAddress(api: ApiPromise, name: string, symbol: string): EvmAddress | undefined {
   const chain = getChain(api);
   const configs = chain === "acala" ? ACALA_EVM_ADDRESS_MAP : KARURA_EVM_ADDRESSES_MAP;
   const matched = configs.find((item) => item.symbol === symbol);
+
+  if (symbol === "WBTC") {
+    if (name === "Wrapped BTC") {
+      return "0xc80084af223c8b598536178d9361dc55bfda6818";
+    } else if (name === "Wrapped Bitcoin") {
+      return "0x0000000000000000000500000000000000000005";
+    }
+  }
 
   return matched?.address;
 }
@@ -20,15 +28,16 @@ function getTokenFromAssetRegistry(api: ApiPromise, id: TokenId, value: AcalaPri
   const isErc20 = token.isErc20;
   const symbol = hexToString(value.symbol.toString());
   const isNative = symbol === getNativeTokenSymbol(api);
+  const name = hexToString(value.name.toHex());
 
   return {
     id,
-    name: hexToString(value.name.toHex()),
+    name,
     symbol,
     decimals: value.decimals.toNumber(),
     isNative,
     isFormEvm: isErc20,
-    evm: isErc20 ? token.asErc20.toHex() : tryToGetEvmAddress(api, symbol),
+    evm: isErc20 ? token.asErc20.toHex() : tryToGetEvmAddress(api, name, symbol),
     minimalBalance: value.minimalBalance.toBigInt(),
   };
 }
@@ -47,7 +56,7 @@ async function getDexShareToken(api: ApiPromise, token: AcalaPrimitivesCurrencyC
     decimals: token0.decimals,
     isNative: false,
     isFormEvm: false,
-    evm: undefined,
+    evm: tryToGetEvmAddress(api, `LP ${token0.symbol}-${token1.symbol}`, `LP_${token0.symbol}_${token1.symbol}`),
     minimalBalance: 0n,
   };
 }
