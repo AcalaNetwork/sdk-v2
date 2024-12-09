@@ -1,7 +1,7 @@
 {
   "name": "@acala-network/incentives-v2",
   "author": "Acala Developers <info@acala.network>",
-  "version": "0.0.4-4",
+  "version": "0.0.4-7",
   "license": "Apache-2.0",
   "type": "module",
   "files": [
@@ -40,15 +40,15 @@
   "dependencies": {
     "@acala-network/sdk-v2-types": "workspace:*",
     "@acala-network/wallet-v2": "workspace:*",
-    "@acala-network/types": "^6.2.0",
-    "@polkadot/api": "^14.3.1",
     "bn.js": "^5.2.1",
-    "@polkadot/api-base": "^14.3.1",
-    "@polkadot/types": "^14.3.1",
-    "@polkadot/types-codec": "^14.3.1",
     "lodash": "^4.17.21"
   },
   "devDependencies": {
+    "@polkadot/api": "^14.3.1",
+    "@polkadot/api-base": "^14.3.1",
+    "@polkadot/types": "^14.3.1",
+    "@polkadot/types-codec": "^14.3.1",
+    "@acala-network/types": "^6.2.0",
     "@types/bn.js": "^5.1.6",
     "@types/lodash": "^4.17.13",
     "dotenv": "^16.4.5"
