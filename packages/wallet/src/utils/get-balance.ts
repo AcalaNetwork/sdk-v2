@@ -17,7 +17,7 @@ function formatBalance(data: FrameSystemAccountInfo["data"] | OrmlTokensAccountD
   const free = data.free.toBigInt();
   const locked = data.frozen.toBigInt();
   const reserved = data.reserved.toBigInt();
-  const available = free - reserved > 0n ? free - reserved : 0n;
+  const available = free - locked > 0n ? free - locked : 0n;
 
   return { free, locked, reserved, available };
 }

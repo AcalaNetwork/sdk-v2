@@ -1,5 +1,6 @@
-import { Account, Token, UnifyAddress, TokenId } from "@acala-network/sdk-v2-types";
+import { Account, Token, UnifyAddress, TokenId, TransactionPayload } from "@acala-network/sdk-v2-types";
 import { UnsubscribePromise } from "@polkadot/api-base/types";
+import { TransferParams } from "./extrinsic.js";
 
 export interface Balance {
   free: bigint;
@@ -58,4 +59,7 @@ export interface WalletAdapter {
    * @param callback - The callback function
    */
   watchIssuance(token: TokenId, callback: (issuance: bigint) => void): UnsubscribePromise;
+
+  // extrinsic
+  transfer: (params: TransferParams) => TransactionPayload;
 }

@@ -11,6 +11,8 @@ import { UnsubscribePromise } from "@polkadot/api-base/types";
 import { createPublicClient, http, PublicClient } from "viem";
 import { acala } from "viem/chains";
 import { lookupToken } from "../utils/lookup-token.js";
+import { getTransferTx } from "../extrinsic/transfer.js";
+import { TransferParams } from "../types/extrinsic.js";
 
 interface WalletOptions {
   api: ApiPromise;
@@ -70,4 +72,6 @@ export class Wallet implements WalletAdapter {
   watchIssuance(token: TokenId, callback: (issuance: bigint) => void): UnsubscribePromise {
     return watchIssuance(this.api, this.publicClient, token, callback);
   }
+
+  transfer = (params: TransferParams) => getTransferTx({ api: this.api })(params);
 }

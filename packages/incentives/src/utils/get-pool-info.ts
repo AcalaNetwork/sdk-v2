@@ -122,9 +122,11 @@ export async function getPoolDeductionPeriodConfig(api: ApiPromise): Promise<Ded
  * @returns The deduction configs
  */
 export async function getPoolDeductionConfigs(api: ApiPromise, poolId: PoolId): Promise<DeductionConfig[]> {
-  const rate = await api.query.incentives.claimRewardDeductionRates(poolId);
-  const specifiedDeductionToken = await api.query.incentives.claimRewardDeductionCurrency(poolId);
-  const rewardTokens = await api.query.incentives.incentiveRewardAmounts.entries(poolId);
+  const [rate, specifiedDeductionToken, rewardTokens] = await Promise.all([
+    api.query.incentives.claimRewardDeductionRates(poolId),
+    api.query.incentives.claimRewardDeductionCurrency(poolId),
+    api.query.incentives.incentiveRewardAmounts.entries(poolId),
+  ]);
 
   // when there is no reward token, return empty array
   if (rewardTokens.length === 0) {
@@ -194,10 +196,13 @@ export function getBasePoolInfo(api: ApiPromise, poolId: PoolId): BasePool {
  * @returns The pool info
  */
 export async function getPoolInfo(api: ApiPromise, poolId: PoolId): Promise<PoolInfo> {
-  const rewardConfigs = await getPoolRewardConfigs(api, poolId);
-  const deductionConfigs = await getPoolDeductionConfigs(api, poolId);
-  const { totalShares, rewards } = await getPoolRewardsAndStakedInfo(api, poolId);
-  const globalDeductionPeriodConfig = await getPoolDeductionPeriodConfig(api);
+  const [rewardConfigs, deductionConfigs, { totalShares, rewards }, globalDeductionPeriodConfig] = await Promise.all([
+    getPoolRewardConfigs(api, poolId),
+    getPoolDeductionConfigs(api, poolId),
+    getPoolRewardsAndStakedInfo(api, poolId),
+    getPoolDeductionPeriodConfig(api),
+  ]);
+
   const deductionPeriodConfig = globalDeductionPeriodConfig.find((item) => item.poolId === poolId);
 
   return {
@@ -227,26 +232,24 @@ export async function watchPoolInfo(
   // fetch the reward configs for watching the reward amount
   const rewardConfigs = await getPoolRewardConfigs(api, poolId);
 
-  // when the deduction rate is updated, update the pool info
-  unsubList.push(
-    await api.query.incentives.claimRewardDeductionRates(poolId, () => {
-      trigger();
-    }),
-  );
-
-  // when the pool info storage has been updated, update the pool info
-  unsubList.push(
-    await api.query.rewards.poolInfos(poolId, () => {
-      trigger();
-    }),
-  );
-
   // when the reward amount has been updated, update the pool info
   const subRewardsChange = rewardConfigs.map(async (reward) => {
     return await api.query.incentives.incentiveRewardAmounts(poolId, reward.token, () => trigger());
   });
 
-  unsubList.push(...(await Promise.all(subRewardsChange)));
+  unsubList.push(
+    ...(await Promise.all([
+      // when the deduction rate is updated, update the pool info
+      await api.query.incentives.claimRewardDeductionRates(poolId, () => {
+        trigger();
+      }),
+      // when the pool info storage has been updated, update the pool info
+      await api.query.rewards.poolInfos(poolId, () => {
+        trigger();
+      }),
+      ...subRewardsChange,
+    ])),
+  );
 
   return () => {
     unsubList.forEach((unsub) => unsub());

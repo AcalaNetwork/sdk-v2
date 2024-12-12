@@ -1,7 +1,7 @@
 {
   "name": "@acala-network/wallet-v2",
   "author": "Acala Developers <info@acala.network>",
-  "version": "0.0.4-7",
+  "version": "0.0.4-12",
   "license": "Apache-2.0",
   "type": "module",
   "files": [
@@ -36,7 +36,6 @@
   "packageManager": "pnpm@9.14.1",
   "peerDependencies": {
     "@polkadot/api": "^14",
-    "ethers": "~5.7.0",
     "viem": "^2.21"
   },
   "dependencies": {
@@ -54,7 +53,6 @@
     "@polkadot/types": "^14.3.1",
     "@polkadot/types-codec": "^14.3.1",
     "@polkadot/util": "^13.2.3",
-    "@polkadot/util-crypto": "^13.2.3",
-    "ethers": "~5.7.0"
+    "@polkadot/util-crypto": "^13.2.3"
   }
 }

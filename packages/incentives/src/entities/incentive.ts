@@ -7,6 +7,10 @@ import { UnifyAddress } from "@acala-network/sdk-v2-types";
 import { getUserPosition, watchUserPosition } from "../utils/get-user-position.js";
 import { getUserACAStakingLedger, watchUserACAStakingLedger } from "../utils/get-user-ledger.js";
 import { getACAStakingPoolConfig } from "../utils/get-aca-staking-configs.js";
+import { getAcaStakingStakeTx } from "../extrinsics/aca-staking-stake.js";
+import { getAcaStakingWithdrawUnstakedTx } from "../extrinsics/aca-staking-withdraw-unstaked.js";
+import { getAcaStakingUnstakeTx } from "../extrinsics/aca-staking-unstake.js";
+import { getAcaStakingRestakeTx } from "../extrinsics/aca-staking-restake.js";
 
 export class Incentive implements IncentiveAdapter {
   private api: ApiPromise;
@@ -43,5 +47,11 @@ export class Incentive implements IncentiveAdapter {
     getPoolConfig: () => getACAStakingPoolConfig(this.api),
     getLedger: (address) => getUserACAStakingLedger(this.api, address),
     watchLedger: (address, callback) => watchUserACAStakingLedger(this.api, address, callback),
+
+    // extrinsics
+    stake: (params) => getAcaStakingStakeTx({ api: this.api })(params),
+    unstake: (params) => getAcaStakingUnstakeTx({ api: this.api })(params),
+    restake: (params) => getAcaStakingRestakeTx({ api: this.api })(params),
+    withdrawUnstaked: () => getAcaStakingWithdrawUnstakedTx({ api: this.api })(),
   };
 }

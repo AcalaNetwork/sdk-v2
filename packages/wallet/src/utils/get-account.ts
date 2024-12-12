@@ -3,7 +3,7 @@ import { addressEq, blake2AsU8a, decodeAddress, encodeAddress } from "@polkadot/
 import { Account, EvmAddress, SubstrateAddress, UnifyAddress } from "@acala-network/sdk-v2-types";
 import { ApiPromise } from "@polkadot/api";
 import { isHex } from "@polkadot/util";
-import { isAddress, getAddress } from "ethers/lib/utils.js";
+import { isAddress, getAddress } from "viem";
 
 /**
  * Compute the default evm address from the substrate address

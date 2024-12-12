@@ -1,6 +1,7 @@
 import { UnsubscribePromise } from "@polkadot/api-base/types";
 
-import { TokenId, UnifyAddress } from "@acala-network/sdk-v2-types";
+import { TokenId, TransactionPayload, UnifyAddress } from "@acala-network/sdk-v2-types";
+import { AcaStakingRestakeParams, AcaStakingStakeParams, AcaStakingUnstakeParams } from "./extrinsics.js";
 
 export const PoolTypes = ["LOANS", "DEX", "EARNING"] as const;
 
@@ -136,15 +137,24 @@ export interface IncentiveAdapter {
     callback: (userPosition: UserPosition) => void,
   ): UnsubscribePromise;
 
+  // extrinsic
+  // claimRewards: (params: IncentiveClaimRewardsParams) => TransactionPayload;
+
   // specific for acala staking
   acaStaking: AcaStakingAdapter;
 }
 
 export interface AcaStakingAdapter {
   // get the acala staking pool config
-  getPoolConfig(): Promise<ACAStakingPoolConfig>;
+  getPoolConfig(): ACAStakingPoolConfig;
   // get the acala staking ledger of the user
   getLedger(address: UnifyAddress): Promise<ACAStakingLedger>;
   // watch the acala staking ledger of the user
   watchLedger(address: UnifyAddress, callback: (ledger: ACAStakingLedger) => void): UnsubscribePromise;
+
+  // extrinsic
+  stake: (params: AcaStakingStakeParams) => TransactionPayload;
+  unstake: (params: AcaStakingUnstakeParams) => TransactionPayload;
+  restake: (params: AcaStakingRestakeParams) => TransactionPayload;
+  withdrawUnstaked: () => TransactionPayload;
 }
