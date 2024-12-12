@@ -2,11 +2,16 @@ import { encodeFunctionData } from "viem";
 import { INCENTIVE_CONTRACT_ADDRESS } from "../constants/contract.js";
 import invariant from "tiny-invariant";
 import { IncentiveClaimRewardsParams } from "../types/extrinsics.js";
-import { BaseCreateTxContext, TransactionPayload } from "@acala-network/sdk-v2-types";
+import {
+  BaseCreateTxContext,
+  TransactionPayload,
+} from "@acala-network/sdk-v2-types";
 import { incentiveAbi } from "../abis/incentive.js";
 import { ModuleSupportIncentivesPoolId } from "@polkadot/types/lookup";
 
-function getSubstrateTxPayload(params: IncentiveClaimRewardsParams & BaseCreateTxContext) {
+function getSubstrateTxPayload(
+  params: IncentiveClaimRewardsParams & BaseCreateTxContext,
+) {
   const { api, pool } = params;
 
   invariant(api, "Substrate API is not set");
@@ -15,7 +20,9 @@ function getSubstrateTxPayload(params: IncentiveClaimRewardsParams & BaseCreateT
   return api.tx.incentives.claimRewards(pool);
 }
 
-function getEvmTxPayload(params: IncentiveClaimRewardsParams & BaseCreateTxContext) {
+function getEvmTxPayload(
+  params: IncentiveClaimRewardsParams & BaseCreateTxContext,
+) {
   const { api, pool } = params;
   const contractAddress = INCENTIVE_CONTRACT_ADDRESS;
 
@@ -23,7 +30,10 @@ function getEvmTxPayload(params: IncentiveClaimRewardsParams & BaseCreateTxConte
   invariant(pool, "Pool is not set");
 
   const rawPool = pool.toString();
-  const rawPoolId = api.createType<ModuleSupportIncentivesPoolId>("ModuleSupportIncentivesPoolId", rawPool);
+  const rawPoolId = api.createType<ModuleSupportIncentivesPoolId>(
+    "ModuleSupportIncentivesPoolId",
+    rawPool,
+  );
 
   const poolId = rawPoolId.asEarning.toNumber();
   const poolCurrencyId = rawPoolId.asEarning.asToken.toHex();

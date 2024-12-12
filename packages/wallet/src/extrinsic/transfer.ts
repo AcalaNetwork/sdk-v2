@@ -1,6 +1,9 @@
 import { encodeFunctionData, erc20Abi } from "viem";
 import invariant from "tiny-invariant";
-import { BaseCreateTxContext, TransactionPayload } from "@acala-network/sdk-v2-types";
+import {
+  BaseCreateTxContext,
+  TransactionPayload,
+} from "@acala-network/sdk-v2-types";
 import { TransferParams } from "../types/extrinsic.js";
 import { AcalaPrimitivesCurrencyCurrencyId } from "@polkadot/types/lookup";
 import { getNativeTokenSymbol } from "../utils/get-chain-info.js";
@@ -16,9 +19,12 @@ function getSubstrateTxPayload(params: TransferParams & BaseCreateTxContext) {
 
   // get the native token id
   const nativeTokenId = api
-    .createType<AcalaPrimitivesCurrencyCurrencyId>("AcalaPrimitivesCurrencyCurrencyId", {
-      Token: getNativeTokenSymbol(api),
-    })
+    .createType<AcalaPrimitivesCurrencyCurrencyId>(
+      "AcalaPrimitivesCurrencyCurrencyId",
+      {
+        Token: getNativeTokenSymbol(api),
+      },
+    )
     .toHex();
 
   // check if the token is native token, when it is ,should use `balances.transferAllowDeath`,
@@ -50,7 +56,9 @@ function getEvmTxPayload(params: TransferParams) {
   };
 }
 
-export function getTransferTx(context: BaseCreateTxContext): (params: TransferParams) => TransactionPayload {
+export function getTransferTx(
+  context: BaseCreateTxContext,
+): (params: TransferParams) => TransactionPayload {
   const { api } = context;
 
   return (params: TransferParams) => {

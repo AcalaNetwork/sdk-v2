@@ -3,9 +3,15 @@ import { ModuleSupportIncentivesPoolId } from "@polkadot/types/lookup";
 import { BasePool, PoolId } from "../types/index.js";
 import { TokenId } from "@acala-network/sdk-v2-types";
 
-export function getPoolFromRawPoolId(poolId: ModuleSupportIncentivesPoolId): BasePool {
+export function getPoolFromRawPoolId(
+  poolId: ModuleSupportIncentivesPoolId,
+): BasePool {
   const type = poolId.isDex ? "DEX" : poolId.isEarning ? "EARNING" : "LOANS";
-  const token = poolId.isDex ? poolId.asDex : poolId.isEarning ? poolId.asEarning : poolId.asLoans;
+  const token = poolId.isDex
+    ? poolId.asDex
+    : poolId.isEarning
+      ? poolId.asEarning
+      : poolId.asLoans;
 
   return {
     id: poolId.toHex() as PoolId,

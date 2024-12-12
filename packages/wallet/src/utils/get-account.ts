@@ -1,6 +1,22 @@
-import { hexToU8a, u8aConcat, u8aEq, u8aFixLength, u8aToHex } from "@polkadot/util";
-import { addressEq, blake2AsU8a, decodeAddress, encodeAddress } from "@polkadot/util-crypto";
-import { Account, EvmAddress, SubstrateAddress, UnifyAddress } from "@acala-network/sdk-v2-types";
+import {
+  hexToU8a,
+  u8aConcat,
+  u8aEq,
+  u8aFixLength,
+  u8aToHex,
+} from "@polkadot/util";
+import {
+  addressEq,
+  blake2AsU8a,
+  decodeAddress,
+  encodeAddress,
+} from "@polkadot/util-crypto";
+import {
+  Account,
+  EvmAddress,
+  SubstrateAddress,
+  UnifyAddress,
+} from "@acala-network/sdk-v2-types";
 import { ApiPromise } from "@polkadot/api";
 import { isHex } from "@polkadot/util";
 import { isAddress, getAddress } from "viem";
@@ -10,7 +26,9 @@ import { isAddress, getAddress } from "viem";
  * @param address - The substrate address
  * @returns The evm address
  */
-export const computeDefaultEvmAddress = (address: SubstrateAddress): EvmAddress => {
+export const computeDefaultEvmAddress = (
+  address: SubstrateAddress,
+): EvmAddress => {
   const publicKey = decodeAddress(address);
   const isStartWithEvm = u8aEq("evm:", publicKey.slice(0, 4));
 
@@ -18,7 +36,9 @@ export const computeDefaultEvmAddress = (address: SubstrateAddress): EvmAddress 
     return getAddress(u8aToHex(publicKey.slice(4, 24))) as EvmAddress;
   }
 
-  return getAddress(u8aToHex(blake2AsU8a(u8aConcat("evm:", publicKey), 256).slice(0, 20))) as EvmAddress;
+  return getAddress(
+    u8aToHex(blake2AsU8a(u8aConcat("evm:", publicKey), 256).slice(0, 20)),
+  ) as EvmAddress;
 };
 
 // NOTE: Since the computeDefaultEvmAddress process is irreversible,
@@ -31,8 +51,12 @@ export const computeDefaultEvmAddress = (address: SubstrateAddress): EvmAddress 
  * @param address - The evm address
  * @returns The substrate address
  */
-export function computeDefaultSubstrateAddress(address: EvmAddress): SubstrateAddress {
-  return encodeAddress(u8aFixLength(u8aConcat("evm:", hexToU8a(address)), 256, true)).toString() as SubstrateAddress;
+export function computeDefaultSubstrateAddress(
+  address: EvmAddress,
+): SubstrateAddress {
+  return encodeAddress(
+    u8aFixLength(u8aConcat("evm:", hexToU8a(address)), 256, true),
+  ).toString() as SubstrateAddress;
 }
 
 /**
@@ -50,7 +74,9 @@ export function isDefaultSubstrateAddress(address: SubstrateAddress): boolean {
  * @param address - The default substrate address
  * @returns The evm address
  */
-export function getEvmAddressFromDefaultSubstrateAddress(address: SubstrateAddress): EvmAddress {
+export function getEvmAddressFromDefaultSubstrateAddress(
+  address: SubstrateAddress,
+): EvmAddress {
   const publicKey = decodeAddress(address);
   return getAddress(u8aToHex(publicKey.slice(4, 24))) as EvmAddress;
 }
@@ -96,13 +122,19 @@ function isEvmAddressEqual(a: EvmAddress, b: EvmAddress): boolean {
  * @param address - The substrate address
  * @returns The formatted substrate address
  */
-export function formatSubstrateAddress(api: ApiPromise, address: SubstrateAddress): SubstrateAddress {
+export function formatSubstrateAddress(
+  api: ApiPromise,
+  address: SubstrateAddress,
+): SubstrateAddress {
   const ss58 = api.registry.chainSS58;
 
   return encodeAddress(decodeAddress(address), ss58) as SubstrateAddress;
 }
 
-export async function getAccount(api: ApiPromise, address: UnifyAddress): Promise<Account> {
+export async function getAccount(
+  api: ApiPromise,
+  address: UnifyAddress,
+): Promise<Account> {
   const isSubstrateAddress = isValidSubstrateAddress(address);
   const isEvmAddress = isValidEvmAddress(address);
 
@@ -129,7 +161,9 @@ export async function getAccount(api: ApiPromise, address: UnifyAddress): Promis
     const boundedEvmAddress = await api.query.evmAccounts.evmAddresses(input);
     const isBound = !(boundedEvmAddress.isEmpty || boundedEvmAddress.isNone);
     const defaultEvmAddress = computeDefaultEvmAddress(input);
-    const evmAddress = getAddress(isBound ? boundedEvmAddress.unwrap().toHex() : defaultEvmAddress) as EvmAddress;
+    const evmAddress = getAddress(
+      isBound ? boundedEvmAddress.unwrap().toHex() : defaultEvmAddress,
+    ) as EvmAddress;
 
     return {
       // NOTE: We need to format the substrate address to the chain's ss58 format
@@ -148,9 +182,13 @@ export async function getAccount(api: ApiPromise, address: UnifyAddress): Promis
     const input = getAddress(address) as EvmAddress;
     const boundedSubstrateAddress = await api.query.evmAccounts.accounts(input);
 
-    const isBound = !(boundedSubstrateAddress.isEmpty || boundedSubstrateAddress.isNone);
+    const isBound = !(
+      boundedSubstrateAddress.isEmpty || boundedSubstrateAddress.isNone
+    );
     const defaultSubstrateAddress = computeDefaultSubstrateAddress(input);
-    const substrateAddress = isBound ? boundedSubstrateAddress.unwrap().toString() : defaultSubstrateAddress;
+    const substrateAddress = isBound
+      ? boundedSubstrateAddress.unwrap().toString()
+      : defaultSubstrateAddress;
 
     return {
       // NOTE: We need to format the substrate address to the chain's ss58 format

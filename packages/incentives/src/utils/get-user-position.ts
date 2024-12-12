@@ -1,8 +1,21 @@
 import { ApiPromise } from "@polkadot/api";
-import { SubstrateAddress, TokenId, UnifyAddress } from "@acala-network/sdk-v2-types";
-import { DeductionConfig, PoolId, UserPosition, UserReward } from "../types/index.js";
+import {
+  SubstrateAddress,
+  TokenId,
+  UnifyAddress,
+} from "@acala-network/sdk-v2-types";
+import {
+  DeductionConfig,
+  PoolId,
+  UserPosition,
+  UserReward,
+} from "../types/index.js";
 import { getAccount } from "@acala-network/wallet-v2/utils/get-account.js";
-import { getPoolDeductionConfigs, getPoolRewardsAndStakedInfo, watchPoolInfo } from "./get-pool-info.js";
+import {
+  getPoolDeductionConfigs,
+  getPoolRewardsAndStakedInfo,
+  watchPoolInfo,
+} from "./get-pool-info.js";
 import { throttle } from "lodash";
 import { UnsubscribePromise, VoidFn } from "@polkadot/api-base/types";
 
@@ -22,18 +35,26 @@ function calculateReward(
   poolTotalShares: bigint,
   userWithdrawnAmount: bigint,
 ) {
-  const userRewardAmount = (poolTotalReward * userShareAmount) / poolTotalShares - userWithdrawnAmount;
+  const userRewardAmount =
+    (poolTotalReward * userShareAmount) / poolTotalShares - userWithdrawnAmount;
   const remainingRewards = poolTotalReward - poolWithdrawnAmount;
 
-  return userRewardAmount > remainingRewards ? remainingRewards : userRewardAmount;
+  return userRewardAmount > remainingRewards
+    ? remainingRewards
+    : userRewardAmount;
 }
 
-async function getUserShareAndRewards(api: ApiPromise, poolId: PoolId, address: SubstrateAddress) {
+async function getUserShareAndRewards(
+  api: ApiPromise,
+  poolId: PoolId,
+  address: SubstrateAddress,
+) {
   const poolState = await getPoolRewardsAndStakedInfo(api, poolId);
   const poolTotalShares = poolState.totalShares;
   const poolRewardList = poolState.rewards;
 
-  const [userShareAmount, userWithdrawnRewards] = await api.query.rewards.sharesAndWithdrawnRewards(poolId, address);
+  const [userShareAmount, userWithdrawnRewards] =
+    await api.query.rewards.sharesAndWithdrawnRewards(poolId, address);
 
   const userRewards: UserReward[] = poolRewardList.map((poolReward) => {
     const withdrawnAmount =
@@ -69,15 +90,21 @@ async function getUserShareAndRewards(api: ApiPromise, poolId: PoolId, address: 
  * @param rewards - the rewards of the user
  * @returns the rewards after deduction
  */
-function getRewardsAfterDeduction(deductionConfigs: DeductionConfig[], rewards: UserReward[]) {
+function getRewardsAfterDeduction(
+  deductionConfigs: DeductionConfig[],
+  rewards: UserReward[],
+) {
   return rewards.map((reward) => {
-    const deductionConfig = deductionConfigs.find((config) => config.token === reward.token);
+    const deductionConfig = deductionConfigs.find(
+      (config) => config.token === reward.token,
+    );
 
     if (!deductionConfig) {
       return reward;
     }
 
-    const deductionAmount = (reward.availableAmount * deductionConfig.rate) / 10n ** 18n;
+    const deductionAmount =
+      (reward.availableAmount * deductionConfig.rate) / 10n ** 18n;
     const claimableAmount = reward.availableAmount - deductionAmount;
 
     return {
@@ -94,7 +121,10 @@ function getRewardsAfterDeduction(deductionConfigs: DeductionConfig[], rewards: 
  * @param pendingRewards - the pending rewards of the user
  * @returns the merged rewards
  */
-function mergeRewards(rewards: UserReward[], pendingRewards: UserReward[]): UserReward[] {
+function mergeRewards(
+  rewards: UserReward[],
+  pendingRewards: UserReward[],
+): UserReward[] {
   const rewardTokens = new Set(rewards.map((reward) => reward.token));
   pendingRewards.forEach((item) => {
     rewardTokens.add(item.token);
@@ -106,9 +136,15 @@ function mergeRewards(rewards: UserReward[], pendingRewards: UserReward[]): User
 
     return {
       token,
-      availableAmount: (reward?.availableAmount ?? 0n) + (pendingReward?.availableAmount ?? 0n),
-      deductionAmount: (reward?.deductionAmount ?? 0n) + (pendingReward?.deductionAmount ?? 0n),
-      claimableAmount: (reward?.claimableAmount ?? 0n) + (pendingReward?.claimableAmount ?? 0n),
+      availableAmount:
+        (reward?.availableAmount ?? 0n) +
+        (pendingReward?.availableAmount ?? 0n),
+      deductionAmount:
+        (reward?.deductionAmount ?? 0n) +
+        (pendingReward?.deductionAmount ?? 0n),
+      claimableAmount:
+        (reward?.claimableAmount ?? 0n) +
+        (pendingReward?.claimableAmount ?? 0n),
     };
   });
 }
@@ -119,7 +155,11 @@ function mergeRewards(rewards: UserReward[], pendingRewards: UserReward[]): User
  * @param poolId - the pool id
  * @param address - the user address
  */
-async function getPendingRewards(api: ApiPromise, poolId: PoolId, address: SubstrateAddress): Promise<UserReward[]> {
+async function getPendingRewards(
+  api: ApiPromise,
+  poolId: PoolId,
+  address: SubstrateAddress,
+): Promise<UserReward[]> {
   const data = await api.query.incentives.pendingMultiRewards(poolId, address);
 
   return Array.from(data.entries()).map(([token, amount]) => ({
@@ -130,13 +170,24 @@ async function getPendingRewards(api: ApiPromise, poolId: PoolId, address: Subst
   }));
 }
 
-export async function getUserPosition(api: ApiPromise, poolId: PoolId, address: UnifyAddress): Promise<UserPosition> {
+export async function getUserPosition(
+  api: ApiPromise,
+  poolId: PoolId,
+  address: UnifyAddress,
+): Promise<UserPosition> {
   const account = await getAccount(api, address);
-  const { share, rewards } = await getUserShareAndRewards(api, poolId, account.address);
-  const pendingRewards = await getPendingRewards(api, poolId, account.address);
+  const [{ share, rewards }, pendingRewards, deductionConfigs] =
+    await Promise.all([
+      getUserShareAndRewards(api, poolId, account.address),
+      getPendingRewards(api, poolId, account.address),
+      getPoolDeductionConfigs(api, poolId),
+    ]);
+
   const mergedRewards = mergeRewards(rewards, pendingRewards);
-  const deductionConfigs = await getPoolDeductionConfigs(api, poolId);
-  const rewardsAfterDeduction = getRewardsAfterDeduction(deductionConfigs, mergedRewards);
+  const rewardsAfterDeduction = getRewardsAfterDeduction(
+    deductionConfigs,
+    mergedRewards,
+  );
 
   return {
     poolId,

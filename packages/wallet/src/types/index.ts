@@ -1,6 +1,28 @@
-import { Account, Token, UnifyAddress, TokenId, TransactionPayload } from "@acala-network/sdk-v2-types";
+import {
+  Account,
+  Token,
+  UnifyAddress,
+  TokenId,
+  TransactionPayload,
+} from "@acala-network/sdk-v2-types";
 import { UnsubscribePromise } from "@polkadot/api-base/types";
 import { TransferParams } from "./extrinsic.js";
+import {
+  AcalaPrimitivesCurrencyAssetMetadata,
+  AcalaPrimitivesCurrencyCurrencyId,
+  AcalaPrimitivesCurrencyDexShare,
+  FrameSystemAccountInfo,
+  OrmlTokensAccountData,
+  AcalaPrimitivesCurrencyAssetIds,
+} from "@polkadot/types/lookup";
+
+// Type aliases for better readability
+export type DexShare = AcalaPrimitivesCurrencyDexShare;
+export type CurrencyId = AcalaPrimitivesCurrencyCurrencyId;
+export type CurrencyAssetMetadata = AcalaPrimitivesCurrencyAssetMetadata;
+export type SystemAccountInfo = FrameSystemAccountInfo;
+export type OrmlAccountData = OrmlTokensAccountData;
+export type AssetIds = AcalaPrimitivesCurrencyAssetIds;
 
 export interface Balance {
   free: bigint;
@@ -29,6 +51,10 @@ export interface WalletAdapter {
    */
   getRegisteredTokenList(): Promise<Token[]>;
   /**
+   * Get the list of LP tokens
+   */
+  getLPTokenList(): Promise<Token[]>;
+  /**
    * Get the native token
    */
   getNativeToken(): Promise<Token>;
@@ -45,7 +71,11 @@ export interface WalletAdapter {
    * @param address - The address of the account
    * @param callback - The callback function
    */
-  watchBalance(token: TokenId, address: UnifyAddress, callback: (balance: Balance) => void): UnsubscribePromise;
+  watchBalance(
+    token: TokenId,
+    address: UnifyAddress,
+    callback: (balance: Balance) => void,
+  ): UnsubscribePromise;
 
   /**
    * Get the issuance of the token
@@ -58,7 +88,10 @@ export interface WalletAdapter {
    * @param token - The id of the token
    * @param callback - The callback function
    */
-  watchIssuance(token: TokenId, callback: (issuance: bigint) => void): UnsubscribePromise;
+  watchIssuance(
+    token: TokenId,
+    callback: (issuance: bigint) => void,
+  ): UnsubscribePromise;
 
   // extrinsic
   transfer: (params: TransferParams) => TransactionPayload;

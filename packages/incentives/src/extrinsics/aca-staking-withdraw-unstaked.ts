@@ -2,7 +2,10 @@ import { encodeFunctionData } from "viem";
 import { earningAbi } from "../abis/earning.js";
 import { EARNING_CONTRACT_ADDRESS } from "../constants/contract.js";
 import invariant from "tiny-invariant";
-import { BaseCreateTxContext, TransactionPayload } from "@acala-network/sdk-v2-types";
+import {
+  BaseCreateTxContext,
+  TransactionPayload,
+} from "@acala-network/sdk-v2-types";
 
 function getSubstrateTxPayload(params: BaseCreateTxContext) {
   const { api } = params;
@@ -28,7 +31,9 @@ function getEvmTxPayload() {
   };
 }
 
-export function getAcaStakingWithdrawUnstakedTx(context: BaseCreateTxContext): () => TransactionPayload {
+export function getAcaStakingWithdrawUnstakedTx(
+  context: BaseCreateTxContext,
+): () => TransactionPayload {
   const { api } = context;
 
   return () => {

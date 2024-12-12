@@ -3,9 +3,14 @@ import { earningAbi } from "../abis/earning.js";
 import { EARNING_CONTRACT_ADDRESS } from "../constants/contract.js";
 import invariant from "tiny-invariant";
 import { AcaStakingStakeParams } from "../types/extrinsics.js";
-import { BaseCreateTxContext, TransactionPayload } from "@acala-network/sdk-v2-types";
+import {
+  BaseCreateTxContext,
+  TransactionPayload,
+} from "@acala-network/sdk-v2-types";
 
-function getSubstrateTxPayload(params: AcaStakingStakeParams & BaseCreateTxContext) {
+function getSubstrateTxPayload(
+  params: AcaStakingStakeParams & BaseCreateTxContext,
+) {
   const { api, amount } = params;
 
   invariant(api, "Substrate API is not set");

@@ -5,7 +5,7 @@ import {
   getEvmAddressFromDefaultSubstrateAddress,
   isDefaultSubstrateAddress,
 } from "./get-account.js";
-import { getAddress } from "ethers/lib/utils.js";
+import { getAddress } from "viem";
 import { ApiPromise, WsProvider } from "@polkadot/api";
 import dotenv from "dotenv";
 import { formatSubstrateAddress, getAccount } from "./get-account.js";
