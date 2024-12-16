@@ -3,15 +3,15 @@ import { ApiPromise, WsProvider } from "@polkadot/api";
 import dotenv from "dotenv";
 import {
   assetIdToTokenId,
-  assetToToken,
+  assetToCurrency,
   tokenIdToAssetId,
-  tokenToAsset,
+  currencyToAsset,
 } from "./currency-type-convertor.js";
 import { AcalaPrimitivesCurrencyAssetIds, AcalaPrimitivesCurrencyCurrencyId } from "@polkadot/types/lookup";
 
 dotenv.config({ path: "../../.env" });
 
-describe("assetToToken", () => {
+describe("assetToCurrency", () => {
   let api: ApiPromise;
 
   beforeAll(async () => {
@@ -36,7 +36,7 @@ describe("assetToToken", () => {
       "AcalaPrimitivesCurrencyAssetIds",
       { NativeAssetId: 0 },
     );
-    const token = assetToToken(api, asset);
+    const token = assetToCurrency(api, asset);
 
     expect(token.isToken).toBeDefined();
     expect(token.asToken.isAca).toBe(true);
@@ -47,7 +47,7 @@ describe("assetToToken", () => {
       "AcalaPrimitivesCurrencyAssetIds",
       { Erc20: "0x0000000000000000000000000000000000000000" },
     );
-    const token = assetToToken(api, asset);
+    const token = assetToCurrency(api, asset);
 
     expect(token.isErc20).toBeDefined();
     expect(token.asErc20.toHex()).toBe(
@@ -60,7 +60,7 @@ describe("assetToToken", () => {
       "AcalaPrimitivesCurrencyAssetIds",
       { ForeignAssetId: 0 },
     );
-    const token = assetToToken(api, asset);
+    const token = assetToCurrency(api, asset);
 
     expect(token.isForeignAsset).toBeDefined();
     expect(token.asForeignAsset.toString()).toBe("0");
@@ -71,7 +71,7 @@ describe("assetToToken", () => {
       "AcalaPrimitivesCurrencyAssetIds",
       { StableAssetId: 0 },
     );
-    const token = assetToToken(api, asset);
+    const token = assetToCurrency(api, asset);
 
     expect(token.isStableAssetPoolToken).toBeDefined();
     expect(token.asStableAssetPoolToken.toString()).toBe("0");
@@ -79,7 +79,7 @@ describe("assetToToken", () => {
 
   it("should error with invalid asset", () => {
     expect(() =>
-      assetToToken(api, {} as unknown as AcalaPrimitivesCurrencyAssetIds),
+      assetToCurrency(api, {} as unknown as AcalaPrimitivesCurrencyAssetIds),
     ).toThrow("Asset to token conversion failed");
   });
 
@@ -89,12 +89,12 @@ describe("assetToToken", () => {
       "AcalaPrimitivesCurrencyCurrencyId",
       { Token: "ACA" },
     );
-    const asset = tokenToAsset(api, token);
+    const asset = currencyToAsset(api, token);
     const ldotToken = api.createType<AcalaPrimitivesCurrencyCurrencyId>(
       "AcalaPrimitivesCurrencyCurrencyId",
       { LiquidCrowdloan: 13 },
     );
-    const ldotAsset = tokenToAsset(api, ldotToken);
+    const ldotAsset = currencyToAsset(api, ldotToken);
 
     expect(asset.isNativeAssetId).toBeDefined();
     expect(asset.asNativeAssetId.asToken.isAca).toBe(true);
@@ -107,7 +107,7 @@ describe("assetToToken", () => {
       "AcalaPrimitivesCurrencyCurrencyId",
       { Erc20: "0x0000000000000000000000000000000000000000" },
     );
-    const asset = tokenToAsset(api, token);
+    const asset = currencyToAsset(api, token);
 
     expect(asset.isErc20).toBeDefined();
     expect(asset.asErc20.toHex()).toBe(
@@ -120,7 +120,7 @@ describe("assetToToken", () => {
       "AcalaPrimitivesCurrencyCurrencyId",
       { ForeignAsset: "0" },
     );
-    const asset = tokenToAsset(api, token);
+    const asset = currencyToAsset(api, token);
 
     expect(asset.isForeignAssetId).toBeDefined();
     expect(asset.asForeignAssetId.toString()).toBe("0");
@@ -131,15 +131,15 @@ describe("assetToToken", () => {
       "AcalaPrimitivesCurrencyCurrencyId",
       { StableAssetPoolToken: "0" },
     );
-    const asset = tokenToAsset(api, token);
+    const asset = currencyToAsset(api, token);
 
     expect(asset.isStableAssetId).toBeDefined();
     expect(asset.asStableAssetId.toString()).toBe("0");
   });
 
   it("should error with invalid token", () => {
-    expect(() => tokenToAsset(api, {} as unknown as AcalaPrimitivesCurrencyCurrencyId)).toThrow(
-      "Token to asset conversion failed",
+    expect(() => currencyToAsset(api, {} as unknown as AcalaPrimitivesCurrencyCurrencyId)).toThrow(
+      "Currency to asset conversion failed",
     );
   });
 

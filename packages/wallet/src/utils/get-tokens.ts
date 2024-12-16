@@ -1,15 +1,27 @@
 import { EvmAddress, Token, TokenId } from "@acala-network/sdk-v2-types";
 import { ApiPromise } from "@polkadot/api";
-import { assetIdToTokenId, tokenIdToAssetId } from "./currency-type-convertor.js";
+import {
+  assetIdToTokenId,
+  tokenIdToAssetId,
+} from "./currency-type-convertor.js";
 import { hexToString } from "@polkadot/util";
-import { ACALA_EVM_ADDRESS_MAP, KARURA_EVM_ADDRESSES_MAP } from "../configs/evm-address-map.js";
+import {
+  ACALA_EVM_ADDRESS_MAP,
+  KARURA_EVM_ADDRESSES_MAP,
+} from "../configs/evm-address-map.js";
 import { getChain, getNativeTokenSymbol } from "./get-chain-info.js";
-import { AcalaPrimitivesCurrencyAssetMetadata, AcalaPrimitivesCurrencyCurrencyId } from "@polkadot/types/lookup";
 import { erc20Abi, PublicClient } from "viem";
+import { CurrencyAssetMetadata, CurrencyId } from "../types/index.js";
+import { dexShareToCurrency } from "./currency-type-convertor.js";
 
-function tryToGetEvmAddress(api: ApiPromise, name: string, symbol: string): EvmAddress | undefined {
+function tryToGetEvmAddress(
+  api: ApiPromise,
+  name: string,
+  symbol: string,
+): EvmAddress | undefined {
   const chain = getChain(api);
-  const configs = chain === "acala" ? ACALA_EVM_ADDRESS_MAP : KARURA_EVM_ADDRESSES_MAP;
+  const configs =
+    chain === "acala" ? ACALA_EVM_ADDRESS_MAP : KARURA_EVM_ADDRESSES_MAP;
   const matched = configs.find((item) => item.symbol === symbol);
 
   if (symbol === "WBTC") {
@@ -23,8 +35,15 @@ function tryToGetEvmAddress(api: ApiPromise, name: string, symbol: string): EvmA
   return matched?.address;
 }
 
-function getTokenFromAssetRegistry(api: ApiPromise, id: TokenId, value: AcalaPrimitivesCurrencyAssetMetadata): Token {
-  const token = api.createType<AcalaPrimitivesCurrencyCurrencyId>("AcalaPrimitivesCurrencyCurrencyId", id);
+function getTokenFromAssetRegistry(
+  api: ApiPromise,
+  id: TokenId,
+  value: CurrencyAssetMetadata,
+): Token {
+  const token = api.createType<CurrencyId>(
+    "AcalaPrimitivesCurrencyCurrencyId",
+    id,
+  );
   const isErc20 = token.isErc20;
   const symbol = hexToString(value.symbol.toString());
   const isNative = symbol === getNativeTokenSymbol(api);
@@ -37,17 +56,29 @@ function getTokenFromAssetRegistry(api: ApiPromise, id: TokenId, value: AcalaPri
     decimals: value.decimals.toNumber(),
     isNative,
     isFormEvm: isErc20,
-    evm: isErc20 ? token.asErc20.toHex() : tryToGetEvmAddress(api, name, symbol),
+    evm: isErc20
+      ? token.asErc20.toHex()
+      : tryToGetEvmAddress(api, name, symbol),
     minimalBalance: value.minimalBalance.toBigInt(),
   };
 }
 
-async function getDexShareToken(api: ApiPromise, token: AcalaPrimitivesCurrencyCurrencyId): Promise<Token> {
-  if (!token.isDexShare) throw new Error(`The token is not a dex share token: ${token.toHuman()}`);
+export async function getDexShareToken(
+  api: ApiPromise,
+  token: CurrencyId,
+): Promise<Token> {
+  if (!token.isDexShare)
+    throw new Error(`The token is not a dex share token: ${token.toHuman()}`);
 
   const tokens = token.asDexShare;
-  const token0 = await getTokenById(api, tokens[0].toHex());
-  const token1 = await getTokenById(api, tokens[1].toHex());
+  const token0 = await getTokenById(
+    api,
+    dexShareToCurrency(api, tokens[0]).toHex(),
+  );
+  const token1 = await getTokenById(
+    api,
+    dexShareToCurrency(api, tokens[1]).toHex(),
+  );
 
   return {
     id: token.toHex(),
@@ -56,7 +87,11 @@ async function getDexShareToken(api: ApiPromise, token: AcalaPrimitivesCurrencyC
     decimals: token0.decimals,
     isNative: false,
     isFormEvm: false,
-    evm: tryToGetEvmAddress(api, `LP ${token0.symbol}-${token1.symbol}`, `LP_${token0.symbol}_${token1.symbol}`),
+    evm: tryToGetEvmAddress(
+      api,
+      `LP ${token0.symbol}-${token1.symbol}`,
+      `LP_${token0.symbol}_${token1.symbol}`,
+    ),
     minimalBalance: 0n,
   };
 }
@@ -66,9 +101,12 @@ async function getDexShareToken(api: ApiPromise, token: AcalaPrimitivesCurrencyC
  * @param api - ApiPromise
  * @param tokenId - token id
  */
-export function getRawToken(api: ApiPromise, tokenId: TokenId): AcalaPrimitivesCurrencyCurrencyId {
+export function getRawToken(api: ApiPromise, tokenId: TokenId): CurrencyId {
   try {
-    return api.createType<AcalaPrimitivesCurrencyCurrencyId>("AcalaPrimitivesCurrencyCurrencyId", tokenId);
+    return api.createType<CurrencyId>(
+      "AcalaPrimitivesCurrencyCurrencyId",
+      tokenId,
+    );
   } catch (error) {
     throw new Error(`Invalid token ID: ${tokenId}`, { cause: error });
   }
@@ -94,7 +132,11 @@ export async function getRegisteredTokens(api: ApiPromise): Promise<Token[]> {
   const list = await api.query.assetRegistry.assetMetadatas.entries();
 
   return list.map(([key, value]) => {
-    return getTokenFromAssetRegistry(api, assetIdToTokenId(api, key.args[0].toHex()), value.unwrap());
+    return getTokenFromAssetRegistry(
+      api,
+      assetIdToTokenId(api, key.args[0].toHex()),
+      value.unwrap(),
+    );
   });
 }
 
@@ -103,14 +145,19 @@ export async function getRegisteredTokens(api: ApiPromise): Promise<Token[]> {
  * @param api - ApiPromise
  * @param tokenId - token id
  */
-export async function getTokenById(api: ApiPromise, tokenId: TokenId): Promise<Token> {
+export async function getTokenById(
+  api: ApiPromise,
+  tokenId: TokenId,
+): Promise<Token> {
   const rawToken = getRawToken(api, tokenId);
 
   if (rawToken.isDexShare) {
     return getDexShareToken(api, rawToken);
   }
 
-  const data = await api.query.assetRegistry.assetMetadatas(tokenIdToAssetId(api, tokenId));
+  const data = await api.query.assetRegistry.assetMetadatas(
+    tokenIdToAssetId(api, tokenId),
+  );
 
   return getTokenFromAssetRegistry(api, rawToken.toHex(), data.unwrap());
 }
@@ -121,25 +168,23 @@ export async function getTokenById(api: ApiPromise, tokenId: TokenId): Promise<T
  * @param client - PublicClient
  * @param address - EVM address
  */
-export async function getERC20Token(api: ApiPromise, client: PublicClient, address: EvmAddress): Promise<Token> {
-  const symbol = await client.readContract({
-    address,
-    abi: erc20Abi,
-    functionName: "symbol",
-  });
-  const decimals = await client.readContract({
-    address,
-    abi: erc20Abi,
-    functionName: "decimals",
-  });
-  const name = await client.readContract({
-    address,
-    abi: erc20Abi,
-    functionName: "name",
-  });
-  const rawTokenId = api.createType<AcalaPrimitivesCurrencyCurrencyId>("AcalaPrimitivesCurrencyCurrencyId", {
-    Erc20: address,
-  });
+export async function getERC20Token(
+  api: ApiPromise,
+  client: PublicClient,
+  address: EvmAddress,
+): Promise<Token> {
+  const [symbol, decimals, name] = await Promise.all([
+    client.readContract({ address, abi: erc20Abi, functionName: "symbol" }),
+    client.readContract({ address, abi: erc20Abi, functionName: "decimals" }),
+    client.readContract({ address, abi: erc20Abi, functionName: "name" }),
+  ]);
+
+  const rawTokenId = api.createType<CurrencyId>(
+    "AcalaPrimitivesCurrencyCurrencyId",
+    {
+      Erc20: address,
+    },
+  );
   const isNative = symbol === getNativeTokenSymbol(api);
 
   return {

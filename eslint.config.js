@@ -10,7 +10,13 @@ export default [
     files: ["**/*.{js,mjs,cjs,ts}"],
   },
   {
-    ignores: ["coverage", "**/dist/**", "**/node_modules/**", "**/*.d.ts", "**/coverage/**"],
+    ignores: [
+      "coverage",
+      "**/dist/**",
+      "**/node_modules/**",
+      "**/*.d.ts",
+      "**/coverage/**",
+    ],
   },
   { languageOptions: { globals: { ...globals.browser, ...globals.node } } },
   {

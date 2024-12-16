@@ -11,6 +11,11 @@ PACKAGES_DIR="packages"
 
 # Update versions for all sub-packages
 for pkg in $PACKAGES_DIR/*/; do
+    # skip if `pkg` is not a directory
+    if [ ! -d "$pkg" ]; then
+        continue
+    fi
+
     if [ -f "$pkg/package.json" ]; then
         echo "Updating $pkg to version $NEW_VERSION"
         

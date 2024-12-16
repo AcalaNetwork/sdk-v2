@@ -1,8 +1,14 @@
 import { ApiPromise } from "@polkadot/api";
 import { TokenId, Token, EvmAddress } from "@acala-network/sdk-v2-types";
-import { getRegisteredTokens, isTokenId, getERC20Token, getTokenById } from "./get-tokens.js";
+import {
+  getRegisteredTokens,
+  isTokenId,
+  getERC20Token,
+  getTokenById,
+} from "./get-tokens.js";
 import { PublicClient } from "viem";
 import { isValidEvmAddress } from "./get-account.js";
+import { getLPTokenList } from "./get-lp-tokens.js";
 
 /**
  * Lookup a token by symbol or id
@@ -23,9 +29,16 @@ export async function lookupToken(
     return getTokenById(api, tokenSymbolOrId as TokenId);
   }
 
-  const registeredTokens = await getRegisteredTokens(api);
+  const [registeredTokens, lpTokens] = await Promise.all([
+    getRegisteredTokens(api),
+    getLPTokenList(api),
+  ]);
 
-  const token = registeredTokens.find((token) => token.symbol === tokenSymbolOrId);
+  const token =
+    registeredTokens.find((token) => token.symbol === tokenSymbolOrId) ||
+    registeredTokens.find((token) => token.name === tokenSymbolOrId) ||
+    lpTokens.find((token) => token.symbol === tokenSymbolOrId) ||
+    lpTokens.find((token) => token.name === tokenSymbolOrId);
 
   if (!token) throw new Error(`Token ${tokenSymbolOrId} not found`);
 

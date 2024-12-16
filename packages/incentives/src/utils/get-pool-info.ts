@@ -24,8 +24,12 @@ import { throttle } from "lodash";
  * @param poolId - The pool id
  * @returns The reward configs
  */
-export async function getPoolRewardConfigs(api: ApiPromise, poolId: PoolId): Promise<RewardConfig[]> {
-  const rewards = await api.query.incentives.incentiveRewardAmounts.entries<U128>(poolId);
+export async function getPoolRewardConfigs(
+  api: ApiPromise,
+  poolId: PoolId,
+): Promise<RewardConfig[]> {
+  const rewards =
+    await api.query.incentives.incentiveRewardAmounts.entries<U128>(poolId);
 
   return rewards.map(([key, value]) => {
     const rewardToken = key.args[1];
@@ -44,7 +48,9 @@ export async function getPoolRewardConfigs(api: ApiPromise, poolId: PoolId): Pro
  * @param api - The api instance
  * @returns The deduction end block config
  */
-export async function getPoolDeductionPeriodConfig(api: ApiPromise): Promise<DeductionPeriodConfig[]> {
+export async function getPoolDeductionPeriodConfig(
+  api: ApiPromise,
+): Promise<DeductionPeriodConfig[]> {
   const result: Record<PoolId, bigint> = {};
 
   /**
@@ -92,8 +98,13 @@ export async function getPoolDeductionPeriodConfig(api: ApiPromise): Promise<Ded
         }
 
         // handle the updateClaimRewardDeductionRates call
-        if (call.method === "updateClaimRewardDeductionRates" && call.section === "incentives") {
-          const args = call.args as Vec<Vec<ITuple<[ModuleSupportIncentivesPoolId, U128]>>>;
+        if (
+          call.method === "updateClaimRewardDeductionRates" &&
+          call.section === "incentives"
+        ) {
+          const args = call.args as Vec<
+            Vec<ITuple<[ModuleSupportIncentivesPoolId, U128]>>
+          >;
 
           args.forEach((item) => {
             item.forEach(([poolId, rate]) => {
@@ -121,10 +132,15 @@ export async function getPoolDeductionPeriodConfig(api: ApiPromise): Promise<Ded
  * @param poolId - The pool id
  * @returns The deduction configs
  */
-export async function getPoolDeductionConfigs(api: ApiPromise, poolId: PoolId): Promise<DeductionConfig[]> {
-  const rate = await api.query.incentives.claimRewardDeductionRates(poolId);
-  const specifiedDeductionToken = await api.query.incentives.claimRewardDeductionCurrency(poolId);
-  const rewardTokens = await api.query.incentives.incentiveRewardAmounts.entries(poolId);
+export async function getPoolDeductionConfigs(
+  api: ApiPromise,
+  poolId: PoolId,
+): Promise<DeductionConfig[]> {
+  const [rate, specifiedDeductionToken, rewardTokens] = await Promise.all([
+    api.query.incentives.claimRewardDeductionRates(poolId),
+    api.query.incentives.claimRewardDeductionCurrency(poolId),
+    api.query.incentives.incentiveRewardAmounts.entries(poolId),
+  ]);
 
   // when there is no reward token, return empty array
   if (rewardTokens.length === 0) {
@@ -182,7 +198,10 @@ export function getPoolRewardsAndStakedInfo(
 }
 
 export function getBasePoolInfo(api: ApiPromise, poolId: PoolId): BasePool {
-  const rawPoolId = api.createType<ModuleSupportIncentivesPoolId>("ModuleSupportIncentivesPoolId", poolId);
+  const rawPoolId = api.createType<ModuleSupportIncentivesPoolId>(
+    "ModuleSupportIncentivesPoolId",
+    poolId,
+  );
 
   return getPoolFromRawPoolId(rawPoolId);
 }
@@ -193,12 +212,25 @@ export function getBasePoolInfo(api: ApiPromise, poolId: PoolId): BasePool {
  * @param poolId - The pool id
  * @returns The pool info
  */
-export async function getPoolInfo(api: ApiPromise, poolId: PoolId): Promise<PoolInfo> {
-  const rewardConfigs = await getPoolRewardConfigs(api, poolId);
-  const deductionConfigs = await getPoolDeductionConfigs(api, poolId);
-  const { totalShares, rewards } = await getPoolRewardsAndStakedInfo(api, poolId);
-  const globalDeductionPeriodConfig = await getPoolDeductionPeriodConfig(api);
-  const deductionPeriodConfig = globalDeductionPeriodConfig.find((item) => item.poolId === poolId);
+export async function getPoolInfo(
+  api: ApiPromise,
+  poolId: PoolId,
+): Promise<PoolInfo> {
+  const [
+    rewardConfigs,
+    deductionConfigs,
+    { totalShares, rewards },
+    globalDeductionPeriodConfig,
+  ] = await Promise.all([
+    getPoolRewardConfigs(api, poolId),
+    getPoolDeductionConfigs(api, poolId),
+    getPoolRewardsAndStakedInfo(api, poolId),
+    getPoolDeductionPeriodConfig(api),
+  ]);
+
+  const deductionPeriodConfig = globalDeductionPeriodConfig.find(
+    (item) => item.poolId === poolId,
+  );
 
   return {
     ...getBasePoolInfo(api, poolId),
@@ -227,26 +259,28 @@ export async function watchPoolInfo(
   // fetch the reward configs for watching the reward amount
   const rewardConfigs = await getPoolRewardConfigs(api, poolId);
 
-  // when the deduction rate is updated, update the pool info
-  unsubList.push(
-    await api.query.incentives.claimRewardDeductionRates(poolId, () => {
-      trigger();
-    }),
-  );
-
-  // when the pool info storage has been updated, update the pool info
-  unsubList.push(
-    await api.query.rewards.poolInfos(poolId, () => {
-      trigger();
-    }),
-  );
-
   // when the reward amount has been updated, update the pool info
   const subRewardsChange = rewardConfigs.map(async (reward) => {
-    return await api.query.incentives.incentiveRewardAmounts(poolId, reward.token, () => trigger());
+    return await api.query.incentives.incentiveRewardAmounts(
+      poolId,
+      reward.token,
+      () => trigger(),
+    );
   });
 
-  unsubList.push(...(await Promise.all(subRewardsChange)));
+  unsubList.push(
+    ...(await Promise.all([
+      // when the deduction rate is updated, update the pool info
+      await api.query.incentives.claimRewardDeductionRates(poolId, () => {
+        trigger();
+      }),
+      // when the pool info storage has been updated, update the pool info
+      await api.query.rewards.poolInfos(poolId, () => {
+        trigger();
+      }),
+      ...subRewardsChange,
+    ])),
+  );
 
   return () => {
     unsubList.forEach((unsub) => unsub());

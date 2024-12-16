@@ -30,11 +30,15 @@ export async function getIssuance(
 
   // for native tokens in substrate
   if (token.isNative) {
-    return await api.query.balances.totalIssuance().then((res) => res.toBigInt());
+    return await api.query.balances
+      .totalIssuance()
+      .then((res) => res.toBigInt());
   }
 
   // for other tokens in substrate
-  return await api.query.tokens.totalIssuance(token.id).then((res) => res.toBigInt());
+  return await api.query.tokens
+    .totalIssuance(token.id)
+    .then((res) => res.toBigInt());
 }
 
 /**
@@ -68,9 +72,13 @@ export async function watchIssuance(
 
   // for native tokens in substrate
   if (token.isNative) {
-    return api.query.balances.totalIssuance((issuance) => callback(issuance.toBigInt()));
+    return api.query.balances.totalIssuance((issuance) =>
+      callback(issuance.toBigInt()),
+    );
   }
 
   // for other tokens in substrate
-  return api.query.tokens.totalIssuance(token.id, (issuance) => callback(issuance.toBigInt()));
+  return api.query.tokens.totalIssuance(token.id, (issuance) =>
+    callback(issuance.toBigInt()),
+  );
 }

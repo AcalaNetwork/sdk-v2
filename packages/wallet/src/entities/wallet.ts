@@ -11,6 +11,9 @@ import { UnsubscribePromise } from "@polkadot/api-base/types";
 import { createPublicClient, http, PublicClient } from "viem";
 import { acala } from "viem/chains";
 import { lookupToken } from "../utils/lookup-token.js";
+import { getTransferTx } from "../extrinsic/transfer.js";
+import { TransferParams } from "../types/extrinsic.js";
+import { getLPTokenList } from "../utils/get-lp-tokens.js";
 
 interface WalletOptions {
   api: ApiPromise;
@@ -25,6 +28,7 @@ export class Wallet implements WalletAdapter {
     invariant(options.api, "API is required");
 
     this.api = options.api;
+    // create public client for EVM tokens when not provided
     this.publicClient =
       options.publicClient ||
       createPublicClient({
@@ -51,7 +55,10 @@ export class Wallet implements WalletAdapter {
     return getTokenById(this.api, nativeAssetId.toHex());
   }
 
-  getBalance(tokenOrSymbol: TokenId | string, address: UnifyAddress): Promise<Balance> {
+  getBalance(
+    tokenOrSymbol: TokenId | string,
+    address: UnifyAddress,
+  ): Promise<Balance> {
     return getBalance(this.api, this.publicClient, tokenOrSymbol, address);
   }
 
@@ -60,14 +67,31 @@ export class Wallet implements WalletAdapter {
     address: UnifyAddress,
     callback: (balance: Balance) => void,
   ): UnsubscribePromise {
-    return watchBalance(this.api, this.publicClient, tokenOrSymbol, address, callback);
+    return watchBalance(
+      this.api,
+      this.publicClient,
+      tokenOrSymbol,
+      address,
+      callback,
+    );
   }
 
   getIssuance(token: TokenId): Promise<bigint> {
     return getIssuance(this.api, this.publicClient, token);
   }
 
-  watchIssuance(token: TokenId, callback: (issuance: bigint) => void): UnsubscribePromise {
+  watchIssuance(
+    token: TokenId,
+    callback: (issuance: bigint) => void,
+  ): UnsubscribePromise {
     return watchIssuance(this.api, this.publicClient, token, callback);
   }
+
+  getLPTokenList(): Promise<Token[]> {
+    return getLPTokenList(this.api);
+  }
+
+  // extrinsic
+  transfer = (params: TransferParams) =>
+    getTransferTx({ api: this.api })(params);
 }
