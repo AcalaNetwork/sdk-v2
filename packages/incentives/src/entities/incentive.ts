@@ -10,7 +10,7 @@ import {
 import { getPoolList } from "../utils/get-pool-list.js";
 import { getPoolInfo, watchPoolInfo } from "../utils/get-pool-info.js";
 import { UnsubscribePromise } from "@polkadot/api-base/cjs/types/index";
-import { UnifyAddress } from "@acala-network/sdk-v2-types";
+import { TransactionPayload, UnifyAddress } from "@acala-network/sdk-v2-types";
 import {
   getUserPosition,
   watchUserPosition,
@@ -24,6 +24,8 @@ import { getAcaStakingStakeTx } from "../extrinsics/aca-staking-stake.js";
 import { getAcaStakingWithdrawUnstakedTx } from "../extrinsics/aca-staking-withdraw-unstaked.js";
 import { getAcaStakingUnstakeTx } from "../extrinsics/aca-staking-unstake.js";
 import { getAcaStakingRestakeTx } from "../extrinsics/aca-staking-restake.js";
+import { IncentiveClaimRewardsParams } from "../types/extrinsics.js";
+import { getIncentiveClaimRewardsTx } from "../extrinsics/incentive-claim-rewards.js";
 
 export class Incentive implements IncentiveAdapter {
   private api: ApiPromise;
@@ -60,6 +62,12 @@ export class Incentive implements IncentiveAdapter {
     callback: (userPosition: UserPosition) => void,
   ): UnsubscribePromise {
     return watchUserPosition(this.api, poolId, address, callback);
+  }
+
+  claimRewards(
+    params: IncentiveClaimRewardsParams,
+  ): Promise<TransactionPayload> {
+    return getIncentiveClaimRewardsTx({ api: this.api })(params);
   }
 
   acaStaking: AcaStakingAdapter = {

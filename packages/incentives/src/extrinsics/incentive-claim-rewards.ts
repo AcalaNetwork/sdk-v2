@@ -8,6 +8,7 @@ import {
 } from "@acala-network/sdk-v2-types";
 import { incentiveAbi } from "../abis/incentive.js";
 import { ModuleSupportIncentivesPoolId } from "@polkadot/types/lookup";
+import { getTokenById } from "@acala-network/wallet-v2/utils/get-tokens.js";
 
 function getSubstrateTxPayload(
   params: IncentiveClaimRewardsParams & BaseCreateTxContext,
@@ -20,7 +21,7 @@ function getSubstrateTxPayload(
   return api.tx.incentives.claimRewards(pool);
 }
 
-function getEvmTxPayload(
+async function getEvmTxPayload(
   params: IncentiveClaimRewardsParams & BaseCreateTxContext,
 ) {
   const { api, pool } = params;
@@ -35,28 +36,31 @@ function getEvmTxPayload(
     rawPool,
   );
 
-  const poolId = rawPoolId.asEarning.toNumber();
+  const poolId = Number(rawPoolId.index.toString());
   const poolCurrencyId = rawPoolId.asEarning.asToken.toHex();
+  const token = await getTokenById(api, poolCurrencyId);
+
+  invariant(token.evm, "Can't find EVM address for pool token");
 
   return {
     to: contractAddress as `0x${string}`,
     data: encodeFunctionData({
       abi: incentiveAbi,
       functionName: "claimRewards",
-      args: [poolId, poolCurrencyId],
+      args: [poolId, token.evm],
     }),
     value: 0n,
   };
 }
 
-export function getAcaStakingUnstakeTx(
+export function getIncentiveClaimRewardsTx(
   context: BaseCreateTxContext,
-): (params: IncentiveClaimRewardsParams) => TransactionPayload {
+): (params: IncentiveClaimRewardsParams) => Promise<TransactionPayload> {
   const { api } = context;
 
-  return (params: IncentiveClaimRewardsParams) => {
+  return async (params: IncentiveClaimRewardsParams) => {
     const substrateTxPayload = getSubstrateTxPayload({ api, ...params });
-    const evmTxPayload = getEvmTxPayload({ api, ...params });
+    const evmTxPayload = await getEvmTxPayload({ api, ...params });
 
     return {
       substrate: substrateTxPayload,

@@ -5,11 +5,15 @@ import {
   getEvmAddressFromDefaultSubstrateAddress,
   isDefaultSubstrateAddress,
 } from "./get-account.js";
+<<<<<<< Updated upstream
 import { getAddress } from "viem";
+=======
+>>>>>>> Stashed changes
 import { ApiPromise, WsProvider } from "@polkadot/api";
 import dotenv from "dotenv";
 import { formatSubstrateAddress, getAccount } from "./get-account.js";
 import { EvmAddress } from "@acala-network/sdk-v2-types";
+import { getAddress } from "viem";
 
 dotenv.config({ path: "../../.env" });
 

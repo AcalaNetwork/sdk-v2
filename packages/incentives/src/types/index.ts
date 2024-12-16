@@ -9,6 +9,7 @@ import {
   AcaStakingRestakeParams,
   AcaStakingStakeParams,
   AcaStakingUnstakeParams,
+  IncentiveClaimRewardsParams,
 } from "./extrinsics.js";
 
 export const PoolTypes = ["LOANS", "DEX", "EARNING"] as const;
@@ -149,7 +150,9 @@ export interface IncentiveAdapter {
   ): UnsubscribePromise;
 
   // extrinsic
-  // claimRewards: (params: IncentiveClaimRewardsParams) => TransactionPayload;
+  claimRewards: (
+    params: IncentiveClaimRewardsParams,
+  ) => Promise<TransactionPayload>;
 
   // specific for acala staking
   acaStaking: AcaStakingAdapter;
