@@ -41,7 +41,7 @@ export class Wallet implements WalletAdapter {
     return getAccount(this.api, address);
   }
 
-  getToken(id: TokenId): Promise<Token> {
+  getToken(id: string): Promise<Token> {
     return lookupToken(this.api, this.publicClient, id);
   }
 

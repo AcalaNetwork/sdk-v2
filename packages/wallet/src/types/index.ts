@@ -45,7 +45,7 @@ export interface WalletAdapter {
    * Get token information by token id or EVM address
    * @param id - The id of the token or EVM address
    */
-  getToken(id: TokenId): Promise<Token>;
+  getToken(id: string): Promise<Token>;
   /**
    * Get the list of tokens which are registered in the chain
    */
