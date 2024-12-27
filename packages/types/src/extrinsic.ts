@@ -21,5 +21,6 @@ export type EvmTxPayload = {
 // The payload of the transaction for both substrate and evm
 export type TransactionPayload = {
   substrate: SubstrateTxPayload;
-  evm: EvmTxPayload;
+  // evm payload can be an array if the action has multiple steps
+  evm?: EvmTxPayload | EvmTxPayload[];
 };

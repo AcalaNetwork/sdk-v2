@@ -14,6 +14,7 @@ import { lookupToken } from "../utils/lookup-token.js";
 import { getTransferTx } from "../extrinsic/transfer.js";
 import { TransferParams } from "../types/extrinsic.js";
 import { getLPTokenList } from "../utils/get-lp-tokens.js";
+import { getSuggestTokens } from "../utils/get-suggest-tokens.js";
 
 interface WalletOptions {
   api: ApiPromise;
@@ -47,6 +48,10 @@ export class Wallet implements WalletAdapter {
 
   getRegisteredTokenList(): Promise<Token[]> {
     return getRegisteredTokens(this.api);
+  }
+
+  getSuggestTokens(): Promise<Token[]> {
+    return getSuggestTokens(this.api);
   }
 
   getNativeToken(): Promise<Token> {
@@ -93,5 +98,5 @@ export class Wallet implements WalletAdapter {
 
   // extrinsic
   transfer = (params: TransferParams) =>
-    getTransferTx({ api: this.api })(params);
+    getTransferTx({ api: this.api, publicClient: this.publicClient })(params);
 }

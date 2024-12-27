@@ -21,7 +21,20 @@ export async function lookupToken(
   publicClient: PublicClient,
   tokenSymbolOrId: string,
 ): Promise<Token> {
+  const [registeredTokens, lpTokens] = await Promise.all([
+    getRegisteredTokens(api),
+    getLPTokenList(api),
+  ]);
+
   if (isValidEvmAddress(tokenSymbolOrId)) {
+    // try to get the token from registered tokens
+    const token = registeredTokens.find(
+      (token) => token.evm === tokenSymbolOrId,
+    );
+
+    if (token) return token;
+
+    // otherwise, try to get the token from evm
     return getERC20Token(api, publicClient, tokenSymbolOrId as EvmAddress);
   }
 
@@ -29,11 +42,7 @@ export async function lookupToken(
     return getTokenById(api, tokenSymbolOrId as TokenId);
   }
 
-  const [registeredTokens, lpTokens] = await Promise.all([
-    getRegisteredTokens(api),
-    getLPTokenList(api),
-  ]);
-
+  // try to search the token from registered tokens and lp tokens
   const token =
     registeredTokens.find((token) => token.symbol === tokenSymbolOrId) ||
     registeredTokens.find((token) => token.name === tokenSymbolOrId) ||

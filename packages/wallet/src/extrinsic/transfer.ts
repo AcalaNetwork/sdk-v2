@@ -1,4 +1,4 @@
-import { encodeFunctionData, erc20Abi } from "viem";
+import { encodeFunctionData, erc20Abi, PublicClient } from "viem";
 import invariant from "tiny-invariant";
 import {
   BaseCreateTxContext,
@@ -7,12 +7,13 @@ import {
 import { TransferParams } from "../types/extrinsic.js";
 import { AcalaPrimitivesCurrencyCurrencyId } from "@polkadot/types/lookup";
 import { getNativeTokenSymbol } from "../utils/get-chain-info.js";
+import { getAccount } from "../utils/get-account.js";
+import { lookupToken } from "../utils/lookup-token.js";
 
 function getSubstrateTxPayload(params: TransferParams & BaseCreateTxContext) {
   const { api, amount, token, to } = params;
 
   invariant(api, "Substrate API is not set");
-  invariant(amount, "Amount is not set");
   invariant(token, "Token is not set");
   invariant(to, "To address is not set");
   // doesn't need to if token or address is invalid, the extrinsic will throw error
@@ -57,13 +58,31 @@ function getEvmTxPayload(params: TransferParams) {
 }
 
 export function getTransferTx(
-  context: BaseCreateTxContext,
-): (params: TransferParams) => TransactionPayload {
-  const { api } = context;
+  context: BaseCreateTxContext & { publicClient: PublicClient },
+): (params: TransferParams) => Promise<TransactionPayload> {
+  const { api, publicClient } = context;
 
-  return (params: TransferParams) => {
-    const substrateTxPayload = getSubstrateTxPayload({ api, ...params });
-    const evmTxPayload = getEvmTxPayload({ ...params });
+  return async (params: TransferParams) => {
+    const { to, token, amount } = params;
+    const toAccount = await getAccount(api, to);
+    const tokenData = await lookupToken(api, publicClient, token);
+
+    invariant(toAccount, "To account is not found");
+    invariant(tokenData, "Token is not found");
+
+    const substrateTxPayload = getSubstrateTxPayload({
+      api,
+      to,
+      token: tokenData.id,
+      amount,
+    });
+    const evmTxPayload = tokenData.evm
+      ? getEvmTxPayload({
+          to: toAccount.evm,
+          token: tokenData.evm,
+          amount,
+        })
+      : undefined;
 
     return {
       substrate: substrateTxPayload,
