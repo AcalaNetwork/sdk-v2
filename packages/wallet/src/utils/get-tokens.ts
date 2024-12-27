@@ -13,10 +13,16 @@ import { getChain, getNativeTokenSymbol } from "./get-chain-info.js";
 import { erc20Abi, PublicClient } from "viem";
 import { CurrencyAssetMetadata, CurrencyId } from "../types/index.js";
 import { dexShareToCurrency } from "./currency-type-convertor.js";
+import { cache } from "./cache.js";
+import { StorageKey, Option } from "@polkadot/types";
+import {
+  AcalaPrimitivesCurrencyAssetIds,
+  AcalaPrimitivesCurrencyAssetMetadata,
+} from "@polkadot/types/lookup";
 
 function tryToGetEvmAddress(
   api: ApiPromise,
-  name: string,
+  _name: string,
   symbol: string,
 ): EvmAddress | undefined {
   const chain = getChain(api);
@@ -24,18 +30,29 @@ function tryToGetEvmAddress(
     chain === "acala" ? ACALA_EVM_ADDRESS_MAP : KARURA_EVM_ADDRESSES_MAP;
   const matched = configs.find((item) => item.symbol === symbol);
 
-  if (symbol === "WBTC") {
-    if (name === "Wrapped BTC") {
-      return "0xc80084af223c8b598536178d9361dc55bfda6818";
-    } else if (name === "Wrapped Bitcoin") {
-      return "0x0000000000000000000500000000000000000005";
-    }
-  }
-
   return matched?.address;
 }
 
-function getTokenFromAssetRegistry(
+type AssetMetadatasEntity = [
+  StorageKey<[AcalaPrimitivesCurrencyAssetIds]>,
+  Option<AcalaPrimitivesCurrencyAssetMetadata>,
+][];
+
+export async function getMetadataEntries(
+  api: ApiPromise,
+): Promise<AssetMetadatasEntity> {
+  if (cache.get("assetMetadatas")) {
+    return cache.get("assetMetadatas") as AssetMetadatasEntity;
+  }
+
+  const value = await api.query.assetRegistry.assetMetadatas.entries();
+
+  cache.set("assetMetadatas", value);
+
+  return value;
+}
+
+function getTokenFromMetadata(
   api: ApiPromise,
   id: TokenId,
   value: CurrencyAssetMetadata,
@@ -80,18 +97,17 @@ export async function getDexShareToken(
     dexShareToCurrency(api, tokens[1]).toHex(),
   );
 
+  const name = `LP ${token0.symbol}-${token1.symbol}`;
+  const symbol = `LP ${token0.symbol}-${token1.symbol}`;
+
   return {
     id: token.toHex(),
-    name: `LP ${token0.symbol}-${token1.symbol}`,
-    symbol: `LP ${token0.symbol}-${token1.symbol}`,
+    name,
+    symbol,
     decimals: token0.decimals,
     isNative: false,
     isFormEvm: false,
-    evm: tryToGetEvmAddress(
-      api,
-      `LP ${token0.symbol}-${token1.symbol}`,
-      `LP_${token0.symbol}_${token1.symbol}`,
-    ),
+    evm: tryToGetEvmAddress(api, name, symbol),
     minimalBalance: 0n,
   };
 }
@@ -129,10 +145,10 @@ export function isTokenId(api: ApiPromise, tokenId: string): boolean {
  * @param api - ApiPromise
  */
 export async function getRegisteredTokens(api: ApiPromise): Promise<Token[]> {
-  const list = await api.query.assetRegistry.assetMetadatas.entries();
+  const list = await getMetadataEntries(api);
 
   return list.map(([key, value]) => {
-    return getTokenFromAssetRegistry(
+    return getTokenFromMetadata(
       api,
       assetIdToTokenId(api, key.args[0].toHex()),
       value.unwrap(),
@@ -159,7 +175,7 @@ export async function getTokenById(
     tokenIdToAssetId(api, tokenId),
   );
 
-  return getTokenFromAssetRegistry(api, rawToken.toHex(), data.unwrap());
+  return getTokenFromMetadata(api, rawToken.toHex(), data.unwrap());
 }
 
 /**

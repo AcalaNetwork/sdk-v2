@@ -36,11 +36,17 @@ describe("getLPTokenList", () => {
     expect(tokens).toBeDefined();
     expect(tokens.length).toBeGreaterThan(0);
 
+    // filter out the tokens that do not have evm address
+    const noEvmTokens = tokens.filter((token) => !token.evm);
 
-    console.log(tokens[0]);
+    console.log(noEvmTokens);
 
-    expect(tokens[0].name.startsWith("LP")).toBe(true);
-    expect(tokens[0].isFormEvm).toBe(false);
+    // expect all tokens name start with LP
+    expect(tokens.every((token) => token.name.startsWith("LP"))).toBe(true);
+    // expect all tokens is not form evm
+    expect(tokens.every((token) => !token.isFormEvm)).toBe(true);
+    // expect all tokens have evm address
+    expect(tokens.every((token) => token.evm)).toBe(true);
   });
 
   it("should getTokenById work with lp token", async () => {

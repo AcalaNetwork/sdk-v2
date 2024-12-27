@@ -51,6 +51,10 @@ export interface WalletAdapter {
    */
   getRegisteredTokenList(): Promise<Token[]>;
   /**
+   * Get the list of suggest tokens
+   */
+  getSuggestTokens(): Promise<Token[]>;
+  /**
    * Get the list of LP tokens
    */
   getLPTokenList(): Promise<Token[]>;
@@ -94,5 +98,5 @@ export interface WalletAdapter {
   ): UnsubscribePromise;
 
   // extrinsic
-  transfer: (params: TransferParams) => TransactionPayload;
+  transfer: (params: TransferParams) => Promise<TransactionPayload>;
 }
