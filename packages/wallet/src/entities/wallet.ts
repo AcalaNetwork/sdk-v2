@@ -24,11 +24,13 @@ interface WalletOptions {
 export class Wallet implements WalletAdapter {
   private readonly api: ApiPromise;
   private readonly publicClient: PublicClient;
+  readonly chain: string;
 
   constructor(options: WalletOptions) {
     invariant(options.api, "API is required");
 
     this.api = options.api;
+    this.chain = options.api.runtimeChain.toString();
     // create public client for EVM tokens when not provided
     this.publicClient =
       options.publicClient ||
@@ -97,6 +99,9 @@ export class Wallet implements WalletAdapter {
   }
 
   // extrinsic
-  transfer = (params: TransferParams) =>
-    getTransferTx({ api: this.api, publicClient: this.publicClient })(params);
+  transfer(params: TransferParams) {
+    return getTransferTx({ api: this.api, publicClient: this.publicClient })(
+      params,
+    );
+  }
 }

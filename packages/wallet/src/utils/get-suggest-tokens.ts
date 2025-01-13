@@ -16,13 +16,14 @@ type StableAssetPoolEntries = [
 async function getStableAssetPoolEntries(
   api: ApiPromise,
 ): Promise<StableAssetPoolEntries> {
-  if (cache.get("stableAssetPools")) {
-    return cache.get("stableAssetPools") as StableAssetPoolEntries;
+  const chain = getChain(api);
+  if (cache.get(`stableAssetPools-${chain}`)) {
+    return cache.get(`stableAssetPools-${chain}`) as StableAssetPoolEntries;
   }
 
   const value = api.query.stableAsset.pools.entries();
 
-  cache.set("stableAssetPools", value);
+  cache.set(`stableAssetPools-${chain}`, value);
 
   return value;
 }

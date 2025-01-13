@@ -41,13 +41,14 @@ type AssetMetadatasEntity = [
 export async function getMetadataEntries(
   api: ApiPromise,
 ): Promise<AssetMetadatasEntity> {
-  if (cache.get("assetMetadatas")) {
-    return cache.get("assetMetadatas") as AssetMetadatasEntity;
+  const chain = getChain(api);
+  if (cache.get(`assetMetadatas-${chain}`)) {
+    return cache.get(`assetMetadatas-${chain}`) as AssetMetadatasEntity;
   }
 
   const value = await api.query.assetRegistry.assetMetadatas.entries();
 
-  cache.set("assetMetadatas", value);
+  cache.set(`assetMetadatas-${chain}`, value);
 
   return value;
 }
@@ -108,7 +109,7 @@ export async function getDexShareToken(
     isNative: false,
     isFormEvm: false,
     evm: tryToGetEvmAddress(api, name, symbol),
-    minimalBalance: 0n,
+    minimalBalance: token0.minimalBalance,
   };
 }
 

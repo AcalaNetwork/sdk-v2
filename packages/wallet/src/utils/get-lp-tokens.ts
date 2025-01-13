@@ -9,6 +9,7 @@ import {
   AcalaPrimitivesTradingPair,
   ModuleDexTradingPairStatus,
 } from "@polkadot/types/lookup";
+import { getChain } from "./get-chain-info.js";
 
 type TradingPairStatusEntries = [
   StorageKey<[AcalaPrimitivesTradingPair]>,
@@ -18,13 +19,16 @@ type TradingPairStatusEntries = [
 export async function getTradingPairStatusesEntries(
   api: ApiPromise,
 ): Promise<TradingPairStatusEntries> {
-  if (cache.get("tradingPairStatuses")) {
-    return cache.get("tradingPairStatuses") as TradingPairStatusEntries;
+  const chain = getChain(api);
+  if (cache.get(`tradingPairStatuses-${chain}`)) {
+    return cache.get(
+      `tradingPairStatuses-${chain}`,
+    ) as TradingPairStatusEntries;
   }
 
   const value = await api.query.dex.tradingPairStatuses.entries();
 
-  cache.set("tradingPairStatuses", value);
+  cache.set(`tradingPairStatuses-${chain}`, value);
 
   return value;
 }
