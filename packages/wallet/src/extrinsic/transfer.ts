@@ -39,12 +39,31 @@ function getSubstrateTxPayload(params: TransferParams & BaseCreateTxContext) {
   return api.tx.currencies.transfer(to, token, amount);
 }
 
-function getEvmTxPayload(params: TransferParams) {
-  const { amount, token, to } = params;
+function getEvmTxPayload(params: TransferParams & BaseCreateTxContext) {
+  const { amount, token, to, api } = params;
 
   invariant(token, "Token is not set");
   invariant(to, "To address is not set");
   // doesn't need to if token or address is invalid, the extrinsic will throw error
+
+  const nativeTokenId = api
+    .createType<AcalaPrimitivesCurrencyCurrencyId>(
+      "AcalaPrimitivesCurrencyCurrencyId",
+      {
+        Token: getNativeTokenSymbol(api),
+      },
+    )
+    .toHex();
+
+  const isNative = token === nativeTokenId;
+
+  if (isNative) {
+    return {
+      to: to as `0x${string}`,
+      data: "0x" as `0x${string}`,
+      value: amount,
+    };
+  }
 
   return {
     to: token as `0x${string}`,
@@ -78,6 +97,7 @@ export function getTransferTx(
     });
     const evmTxPayload = tokenData.evm
       ? getEvmTxPayload({
+          api,
           to: toAccount.evm,
           token: tokenData.evm,
           amount,
