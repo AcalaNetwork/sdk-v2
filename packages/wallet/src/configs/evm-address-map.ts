@@ -100,6 +100,14 @@ export const ACALA_EVM_ADDRESS_MAP: { symbol: string; address: EvmAddress }[] =
       address: "0x0000000000000000000500000000000000000011",
     },
     {
+      symbol: "LOVA",
+      address: "0x0000000000000000000500000000000000000012",
+    },
+    {
+      symbol: "DAMN",
+      address: "0x0000000000000000000500000000000000000013",
+    },
+    {
       symbol: "tDOT",
       address: "0x0000000000000000000300000000000000000000",
     },
@@ -142,6 +150,10 @@ export const ACALA_EVM_ADDRESS_MAP: { symbol: string; address: EvmAddress }[] =
     {
       symbol: "LP ACA-Nemo",
       address: "0x00000000000000000002000000000001fA904c86",
+    },
+    {
+      symbol: "LP DOT-UNQ",
+      address: "0x000000000000000000020000000002030000000a",
     },
   ];
 

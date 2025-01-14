@@ -78,7 +78,7 @@ export async function getPoolDeductionPeriodConfig(
         const params = [data.call.asLookup.hash_, data.call.asLookup.len];
 
         const preimage = (await api.query.preimage.preimageFor(
-          ...params,
+          params,
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
         )) as unknown as Option<any>;
 
