@@ -20,7 +20,7 @@ import {
   AcalaPrimitivesCurrencyAssetMetadata,
 } from "@polkadot/types/lookup";
 
-function tryToGetEvmAddress(
+export function tryToGetEvmAddress(
   api: ApiPromise,
   _name: string,
   symbol: string,

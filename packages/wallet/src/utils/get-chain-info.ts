@@ -1,5 +1,7 @@
 import { ApiPromise } from "@polkadot/api";
-import { Chain } from "@acala-network/sdk-v2-types";
+import { Chain, EvmAddress, TokenId } from "@acala-network/sdk-v2-types";
+import { tryToGetEvmAddress } from "./get-tokens.js";
+import { AcalaPrimitivesCurrencyCurrencyId } from "@polkadot/types/lookup";
 
 export const getChain = (api: ApiPromise): Chain => {
   const chain = api.runtimeChain.toString().toLowerCase();
@@ -16,4 +18,24 @@ export const getSS58Format = (api: ApiPromise): number => {
 
 export const getNativeTokenSymbol = (api: ApiPromise): string => {
   return api.registry.chainTokens[0];
+};
+
+export const getNativeTokenEvmAddress = (api: ApiPromise): EvmAddress => {
+  const symbol = getNativeTokenSymbol(api);
+  const address = tryToGetEvmAddress(api, symbol, symbol);
+
+  if (!address) throw new Error(`Native token address not found for ${symbol}`);
+
+  return address;
+};
+
+export const getNativeTokenId = (api: ApiPromise): TokenId => {
+  return api
+    .createType<AcalaPrimitivesCurrencyCurrencyId>(
+      "AcalaPrimitivesCurrencyCurrencyId",
+      {
+        Token: getNativeTokenSymbol(api),
+      },
+    )
+    .toHex();
 };

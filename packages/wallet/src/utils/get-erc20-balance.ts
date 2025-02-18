@@ -53,18 +53,21 @@ export function watchErc20Balance(
   });
 
   // watch the balance
-
   const unwatch = client.watchContractEvent({
     address: token,
     abi: erc20Abi,
     eventName: "Transfer",
     onLogs: (logs) => {
       const shouldUpdate = logs.some(
-        (log) => log.args.from === address || log.args.to === address,
+        // check if the log is related to the account
+        (log) =>
+          log.args.from?.toLowerCase() === address.toLowerCase() ||
+          log.args.to?.toLowerCase() === address.toLowerCase(),
       );
 
       if (shouldUpdate) {
         executor().catch((error) => {
+          console.error(`Error updating ${token} balance`, error);
           throw error;
         });
       }
