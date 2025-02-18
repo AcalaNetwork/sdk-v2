@@ -67,7 +67,7 @@ describe("getRegisteredTokens", () => {
     expect(token.symbol).toBe("LP ACA-aSEED");
     expect(token.decimals).toBe(12);
     expect(token.evm).toBeDefined();
-    expect(token.minimalBalance).toBe(0n);
+    expect(token.minimalBalance).toBe(100000000000n);
   });
 
   it("should return true if the token id is valid", () => {
