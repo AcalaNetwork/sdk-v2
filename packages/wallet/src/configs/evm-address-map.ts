@@ -141,7 +141,7 @@ export const ACALA_EVM_ADDRESS_MAP: { symbol: string; address: EvmAddress }[] =
     },
     {
       symbol: "LP DOT-UNQ",
-      address: "0x000000000000000000020000000001030000000a",
+      address: "0x000000000000000000020000000002030000000a",
     },
     {
       symbol: "LP aSEED-LDOT",
@@ -202,6 +202,10 @@ export const KARURA_EVM_ADDRESSES_MAP: {
     address: "0x00000000000000000001000000000000000000ac",
   },
   {
+    symbol: "LIT",
+    address: "0x0000000000000000000500000000000000000014",
+  },
+  {
     symbol: "LP_LKSM_KAR",
     address: "0x0000000000000000000200000000800000000083",
   },
@@ -212,6 +216,10 @@ export const KARURA_EVM_ADDRESSES_MAP: {
   {
     symbol: "LP_KAR_KSM",
     address: "0x0000000000000000000200000000800000000082",
+  },
+  {
+    symbol: "LP_KAR_USDCet",
+    address: "0x000000000000000000020000000080011f3a1058",
   },
   {
     symbol: "LP_LKSM_KSM",

@@ -71,7 +71,11 @@ export async function getPoolDeductionPeriodConfig(
       const data = proposal.unwrap();
 
       if (data.call.isInline) {
-        call = api.createType("Call", data.call.asInline);
+        try {
+          call = api.createType("Call", data.call.asInline);
+        } catch {
+          // ignore the error, because the call is not a valid call
+        }
       }
 
       if (data.call.isLookup) {
@@ -82,7 +86,11 @@ export async function getPoolDeductionPeriodConfig(
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
         )) as unknown as Option<any>;
 
-        call = api.createType("Call", preimage.unwrap().toHex());
+        try {
+          call = api.createType("Call", preimage.unwrap().toHex());
+        } catch {
+          // ignore the error, because the preimage is not a valid call
+        }
       }
 
       if (!call) continue;

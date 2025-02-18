@@ -5,8 +5,10 @@ import {
   TransactionPayload,
 } from "@acala-network/sdk-v2-types";
 import { TransferParams } from "../types/extrinsic.js";
-import { AcalaPrimitivesCurrencyCurrencyId } from "@polkadot/types/lookup";
-import { getNativeTokenSymbol } from "../utils/get-chain-info.js";
+import {
+  getNativeTokenEvmAddress,
+  getNativeTokenId,
+} from "../utils/get-chain-info.js";
 import { getAccount } from "../utils/get-account.js";
 import { lookupToken } from "../utils/lookup-token.js";
 
@@ -19,14 +21,7 @@ function getSubstrateTxPayload(params: TransferParams & BaseCreateTxContext) {
   // doesn't need to if token or address is invalid, the extrinsic will throw error
 
   // get the native token id
-  const nativeTokenId = api
-    .createType<AcalaPrimitivesCurrencyCurrencyId>(
-      "AcalaPrimitivesCurrencyCurrencyId",
-      {
-        Token: getNativeTokenSymbol(api),
-      },
-    )
-    .toHex();
+  const nativeTokenId = getNativeTokenId(api);
 
   // check if the token is native token, when it is ,should use `balances.transferAllowDeath`,
   // otherwise use `currencies.transfer`
@@ -39,29 +34,22 @@ function getSubstrateTxPayload(params: TransferParams & BaseCreateTxContext) {
   return api.tx.currencies.transfer(to, token, amount);
 }
 
-function getEvmTxPayload(params: TransferParams & BaseCreateTxContext) {
+async function getEvmTxPayload(params: TransferParams & BaseCreateTxContext) {
   const { amount, token, to, api } = params;
 
   invariant(token, "Token is not set");
   invariant(to, "To address is not set");
   // doesn't need to if token or address is invalid, the extrinsic will throw error
 
-  const nativeTokenId = api
-    .createType<AcalaPrimitivesCurrencyCurrencyId>(
-      "AcalaPrimitivesCurrencyCurrencyId",
-      {
-        Token: getNativeTokenSymbol(api),
-      },
-    )
-    .toHex();
-
-  const isNative = token === nativeTokenId;
+  const nativeTokenEvmAddress = getNativeTokenEvmAddress(api);
+  const isNative = token === nativeTokenEvmAddress;
 
   if (isNative) {
     return {
       to: to as `0x${string}`,
-      data: "0x" as `0x${string}`,
-      value: amount,
+      data: "" as `0x${string}`,
+      // NOTE: the amount is in the unit of ACA, so we need to convert it to the unit of WEI
+      value: amount * BigInt(10 ** 6),
     };
   }
 
@@ -96,7 +84,7 @@ export function getTransferTx(
       amount,
     });
     const evmTxPayload = tokenData.evm
-      ? getEvmTxPayload({
+      ? await getEvmTxPayload({
           api,
           to: toAccount.evm,
           token: tokenData.evm,
