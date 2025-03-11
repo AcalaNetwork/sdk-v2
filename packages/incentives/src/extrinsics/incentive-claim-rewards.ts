@@ -37,7 +37,7 @@ async function getEvmTxPayload(
   );
 
   const poolId = Number(rawPoolId.index.toString());
-  const poolCurrencyId = rawPoolId.asEarning.asToken.toHex();
+  const poolCurrencyId = rawPoolId.asEarning.toHex();
   const token = await getTokenById(api, poolCurrencyId);
 
   invariant(token.evm, "Can't find EVM address for pool token");
